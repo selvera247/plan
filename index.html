@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Finance Ops — 30 / 60 / 90</title>
+    <meta
+      name="description"
+      content="A 30/60/90 plan for a two-person finance team at an AI-native consulting firm: protect cash, build lean controls, and automate to scale."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#phases">Skip to plan</a>
+
+    <header class="top">
+      <div class="top__brand">Finance Ops</div>
+      <nav class="top__nav" aria-label="Primary">
+        <a href="#pillars">Pillars</a>
+        <a href="#d30">1–30</a>
+        <a href="#d60">31–60</a>
+        <a href="#d90">61–90</a>
+        <a href="#metrics">Metrics</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-brand">
+        <div class="hero__atmosphere" aria-hidden="true"></div>
+        <div class="hero__ledger" aria-hidden="true"></div>
+        <div class="hero__inner">
+          <p id="hero-brand" class="hero__brand reveal">Finance Ops</p>
+          <h1 class="hero__title reveal reveal--delay-1">
+            30 / 60 / 90
+            <span class="hero__title-sub">for a two-person finance team</span>
+          </h1>
+          <p class="hero__lede reveal reveal--delay-2">
+            Protect cash, build controls that don’t need headcount, and automate
+            the repetitive work so the team scales without hiring.
+          </p>
+          <div class="hero__cta reveal reveal--delay-3">
+            <a class="btn btn--primary" href="#d30">Start with days 1–30</a>
+            <a class="btn btn--ghost" href="#pillars">See the three jobs</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="pillars" class="section pillars" aria-labelledby="pillars-title">
+        <div class="section__intro">
+          <p class="eyebrow">Operating model</p>
+          <h2 id="pillars-title">Three jobs. Two people. No spare capacity.</h2>
+          <p class="section__lede">
+            Built for a small firm with project-based revenue—T&amp;M, fixed-fee,
+            and milestone billing—plus meaningful AI and tooling costs.
+          </p>
+        </div>
+        <ol class="pillar-list">
+          <li class="pillar">
+            <span class="pillar__num">01</span>
+            <h3>Protect cash</h3>
+            <p>
+              Know runway weekly. Shorten order-to-cash. Chase what’s already
+              owed before building anything new.
+            </p>
+          </li>
+          <li class="pillar">
+            <span class="pillar__num">02</span>
+            <h3>Lean controls</h3>
+            <p>
+              Segregate revenue vs. cost ownership. Approval thresholds and dual
+              sign-off that two people can actually run.
+            </p>
+          </li>
+          <li class="pillar">
+            <span class="pillar__num">03</span>
+            <h3>Automate to scale</h3>
+            <p>
+              Invoice, reminders, expenses, recon—remove hours per invoice so
+              headcount stays flat as volume grows.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <nav class="phase-rail" aria-label="Plan phases">
+        <a href="#d30" data-phase="d30"><span>01</span> Stabilize</a>
+        <a href="#d60" data-phase="d60"><span>02</span> Build</a>
+        <a href="#d90" data-phase="d90"><span>03</span> Optimize</a>
+      </nav>
+
+      <section id="d30" class="section phase" data-phase="d30" aria-labelledby="d30-title">
+        <div class="phase__head">
+          <p class="phase__days">Days 1–30</p>
+          <h2 id="d30-title">Stabilize and see clearly</h2>
+          <p class="phase__goal">
+            Goal: know where the money is and make sure nothing breaks.
+          </p>
+        </div>
+
+        <div class="phase__grid">
+          <article class="workblock">
+            <h3>Cash visibility</h3>
+            <p>
+              Build a 13-week rolling cash forecast. This is the single most
+              important artifact for a small firm.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Baseline order-to-cash</h3>
+            <p>
+              Map how work becomes an invoice and then cash. Measure DSO, the
+              unbilled WIP backlog, and overdue AR by client.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Split the work</h3>
+            <p>
+              One person owns revenue (billing, collections, revenue recognition).
+              The other owns cost (payables, payroll, contractors, expenses,
+              tooling). Basic segregation of duties with only two people.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Quick wins</h3>
+            <p>
+              Chase overdue invoices, fix billing delays, and make sure contracts
+              have clear payment terms.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Cost audit</h3>
+            <p>
+              List all AI and software spend (LLM APIs, licenses, cloud) and tag
+              it to clients or projects where possible.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Month-end close</h3>
+            <p>
+              Document the current process and set a target—close in 5 business
+              days.
+            </p>
+          </article>
+        </div>
+
+        <div class="checklist" id="checklist-30">
+          <div class="checklist__head">
+            <h3>First-30-days checklist</h3>
+            <p>Mark what you finish. Progress stays on this device.</p>
+          </div>
+          <ul class="checklist__list" role="list">
+            <li>
+              <label
+                ><input type="checkbox" data-key="c1" /> Draft 13-week cash
+                forecast with opening bank balance</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="c2" /> Map order-to-cash and
+                capture DSO, WIP, overdue AR by client</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="c3" /> Assign revenue owner vs.
+                cost owner; document coverage rules</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="c4" /> Collect all invoices
+                &gt;30 days past due; log next action per client</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="c5" /> Inventory AI/software
+                spend and tag to projects</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="c6" /> Write month-end close
+                checklist with a 5-day target</label
+              >
+            </li>
+          </ul>
+          <p class="checklist__progress" aria-live="polite">
+            <span data-done>0</span> of <span data-total>6</span> complete
+          </p>
+        </div>
+      </section>
+
+      <section id="d60" class="section phase phase--alt" data-phase="d60" aria-labelledby="d60-title">
+        <div class="phase__head">
+          <p class="phase__days">Days 31–60</p>
+          <h2 id="d60-title">Build the engine</h2>
+          <p class="phase__goal">
+            Goal: automate the repeatable work and get project-level
+            profitability.
+          </p>
+        </div>
+
+        <div class="engine">
+          <div class="engine__automate">
+            <h3>Automate finance workflows</h3>
+            <ul>
+              <li>Invoice generation from timesheets or milestones</li>
+              <li>Automated payment reminders and collections nudges</li>
+              <li>Expense and receipt capture and coding</li>
+              <li>Bank reconciliation and AP matching</li>
+              <li>
+                AI-assisted anomaly detection on invoices, expenses, and
+                contractor payments
+              </li>
+            </ul>
+          </div>
+          <div class="engine__side">
+            <article class="workblock">
+              <h3>Project profitability</h3>
+              <p>
+                Track margin per engagement, including labor, contractors, and
+                AI/tooling. AI-native firms often under-count token and compute
+                costs.
+              </p>
+            </article>
+            <article class="workblock">
+              <h3>Revenue recognition</h3>
+              <p>
+                Define how fixed-fee, milestone, and retainer work is recognized,
+                and set up the monthly process.
+              </p>
+            </article>
+            <article class="workblock">
+              <h3>Controls</h3>
+              <p>
+                Approval thresholds, dual approval for payments above a set
+                limit, and vendor onboarding checks—keep them lightweight.
+              </p>
+            </article>
+            <article class="workblock">
+              <h3>Reporting</h3>
+              <p>
+                One monthly dashboard: revenue, gross margin by project,
+                utilization, DSO, cash runway, and forecast vs. actual.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="d90" class="section phase" data-phase="d90" aria-labelledby="d90-title">
+        <div class="phase__head">
+          <p class="phase__days">Days 61–90</p>
+          <h2 id="d90-title">Optimize and become a strategic partner</h2>
+          <p class="phase__goal">
+            Goal: shift from record-keeping to decision support.
+          </p>
+        </div>
+
+        <div class="phase__grid phase__grid--wide">
+          <article class="workblock">
+            <h3>Pricing input</h3>
+            <p>
+              Work with leadership on pricing for AI-delivered work. If AI cuts
+              delivery hours, hourly billing erodes revenue—push toward
+              fixed-fee, outcome-based, or value-based pricing using your margin
+              data.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Forecasting</h3>
+            <p>
+              Add a pipeline-to-revenue forecast and scenario planning: losing
+              the top client, adding a hire, an LLM price change.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Concentration &amp; credit risk</h3>
+            <p>
+              Flag client exposure and set payment-term policies before one
+              account can break the cash plan.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Scale readiness</h3>
+            <p>
+              Decide what stays automated, what needs a part-time bookkeeper or
+              fractional controller, and which tools to consolidate.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Compliance</h3>
+            <p>
+              Review tax (sales tax, R&amp;D credits, contractor classification),
+              audit readiness, and data security around financial and client
+              data.
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>Retrospective</h3>
+            <p>
+              Review automations for accuracy and time saved, then set the
+              next-year finance roadmap.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="metrics" class="section metrics" aria-labelledby="metrics-title">
+        <div class="section__intro">
+          <p class="eyebrow">Scoreboard</p>
+          <h2 id="metrics-title">Metrics across all 90 days</h2>
+          <p class="section__lede">
+            Track direction weekly. The dashboard in days 31–60 should make these
+            impossible to ignore.
+          </p>
+        </div>
+        <div class="metrics__table-wrap" role="region" aria-label="Finance metrics">
+          <table class="metrics__table">
+            <thead>
+              <tr>
+                <th scope="col">Metric</th>
+                <th scope="col">Target direction</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>DSO</td>
+                <td><span class="dir dir--down">Down</span></td>
+              </tr>
+              <tr>
+                <td>Unbilled WIP</td>
+                <td><span class="dir dir--down">Down</span></td>
+              </tr>
+              <tr>
+                <td>Days to close</td>
+                <td><span class="dir dir--down">Down · aim ≤ 5</span></td>
+              </tr>
+              <tr>
+                <td>Gross margin per project</td>
+                <td><span class="dir dir--up">Visible and rising</span></td>
+              </tr>
+              <tr>
+                <td>Forecast accuracy</td>
+                <td><span class="dir">Within ~10%</span></td>
+              </tr>
+              <tr>
+                <td>Manual hours per invoice</td>
+                <td><span class="dir dir--down">Down</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="risks" class="section risks" aria-labelledby="risks-title">
+        <div class="section__intro">
+          <p class="eyebrow">Guardrails</p>
+          <h2 id="risks-title">Key risks to manage</h2>
+        </div>
+        <ul class="risk-list">
+          <li>
+            <h3>Key-person dependency</h3>
+            <p>Document everything so either person can cover for the other.</p>
+          </li>
+          <li>
+            <h3>Over-automating too early</h3>
+            <p>Fix the process before you automate it.</p>
+          </li>
+          <li>
+            <h3>Hidden AI costs</h3>
+            <p>
+              Usage-based spend can spike—set budgets and alerts on LLM and
+              cloud usage.
+            </p>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__brand">Finance Ops</div>
+      <p>
+        30 / 60 / 90 for AI-native consulting finance · two people · cash first
+      </p>
+    </footer>
+
+    <script src="./js/main.js"></script>
+  </body>
+</html>
