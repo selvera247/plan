@@ -26,4 +26,5 @@ Then visit `http://127.0.0.1:8000`.
 
 ## Sample artifact
 
-[cash-forecast.html](./cash-forecast.html) — illustrative **13-week rolling cash forecast** for a small AI consulting firm (weekly bridge, ending-cash chart, buffer).
+- [cash-forecast.html](./cash-forecast.html) — illustrative **13-week rolling cash forecast** (weekly bridge, ending-cash chart, buffer)
+- [o2c-dso.html](./o2c-dso.html) — **order-to-cash baseline** + **DSO**, unbilled WIP, and AR aging by client

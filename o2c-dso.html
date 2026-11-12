@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order-to-cash baseline &amp; DSO — Finance Ops</title>
+    <meta
+      name="description"
+      content="Baseline the order-to-cash cycle for an AI consulting firm, then measure DSO, unbilled WIP, and overdue AR by client."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="page-o2c">
+    <a class="skip" href="#baseline">Skip to baseline</a>
+
+    <header class="top">
+      <a class="top__brand" href="./index.html">Finance Ops</a>
+      <nav class="top__nav" aria-label="Primary">
+        <a href="./index.html#d30">Back to plan</a>
+        <a href="#baseline">O2C map</a>
+        <a href="#dso">DSO</a>
+        <a href="#wip">WIP</a>
+        <a href="#ar">AR aging</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="cash-hero" aria-labelledby="o2c-title">
+        <div class="cash-hero__inner">
+          <p class="eyebrow">Days 1–30 · Order-to-cash</p>
+          <h1 id="o2c-title">Baseline O2C. Then measure DSO.</h1>
+          <p class="cash-hero__lede">
+            First map how work becomes an invoice and then cash—and where days
+            pile up. Then calculate DSO, size the unbilled WIP backlog, and
+            break overdue AR down by client.
+          </p>
+          <p class="cash-hero__meta">
+            Sample firm · same book as the cash forecast · as of Nov 10, 2026
+            (America/Chicago)
+          </p>
+        </div>
+      </section>
+
+      <section class="section cash-kpis" aria-label="O2C snapshot">
+        <dl class="kpi-strip">
+          <div>
+            <dt>DSO (count-back)</dt>
+            <dd id="kpi-dso">—</dd>
+          </div>
+          <div>
+            <dt>Unbilled WIP</dt>
+            <dd id="kpi-wip">—</dd>
+          </div>
+          <div>
+            <dt>Overdue AR</dt>
+            <dd id="kpi-overdue">—</dd>
+          </div>
+          <div>
+            <dt>Work → cash (median)</dt>
+            <dd id="kpi-o2c">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="baseline" class="section" aria-labelledby="baseline-title">
+        <div class="section__intro">
+          <p class="eyebrow">Step 1 · Baseline</p>
+          <h2 id="baseline-title">Order-to-cash map</h2>
+          <p class="section__lede">
+            Consulting O2C has two clocks: <em>work-to-bill</em> (WIP sitting
+            uninvoiced) and <em>bill-to-cash</em> (AR outstanding). DSO only
+            covers the second—so baseline both.
+          </p>
+        </div>
+
+        <ol class="o2c-flow" id="o2c-flow"></ol>
+
+        <div class="o2c-bar-wrap" aria-labelledby="bar-title">
+          <h3 id="bar-title" class="o2c-subhead">Where the days sit (median)</h3>
+          <div class="o2c-bar" id="o2c-bar" role="img" aria-label="Stacked median days by O2C stage"></div>
+          <p class="chart-caption" id="o2c-bar-caption"></p>
+        </div>
+      </section>
+
+      <section id="dso" class="section phase--alt o2c-dso-section" aria-labelledby="dso-title">
+        <div class="o2c-dso-inner">
+          <div class="section__intro">
+            <p class="eyebrow">Step 2 · Measure</p>
+            <h2 id="dso-title">Days sales outstanding</h2>
+            <p class="section__lede">
+              Use a count-back DSO so one large invoice doesn’t distort the
+              picture the way a simple AR ÷ average daily sales can.
+            </p>
+          </div>
+
+          <div class="dso-grid">
+            <article class="dso-card">
+              <h3>Formula we use</h3>
+              <p class="dso-formula">
+                Start with ending AR. Subtract the most recent months’ credit
+                sales until AR is covered. DSO = days in those full months +
+                the fraction of the next month needed.
+              </p>
+              <dl class="dso-math" id="dso-math"></dl>
+            </article>
+            <article class="dso-card">
+              <h3>What “good” looks like</h3>
+              <ul class="dso-targets">
+                <li>
+                  <strong>Contract terms:</strong> mostly Net 30 → structural
+                  floor near ~30 days once billed.
+                </li>
+                <li>
+                  <strong>Target DSO:</strong>
+                  <span id="dso-target">≤ 38 days</span> (terms + ~1 week of
+                  collection lag).
+                </li>
+                <li>
+                  <strong>Gap to chase:</strong>
+                  <span id="dso-gap">—</span>
+                </li>
+              </ul>
+              <p class="dso-note">
+                DSO ignores unbilled WIP. If work-to-bill is slow, cash still
+                lags even when DSO looks fine.
+              </p>
+            </article>
+          </div>
+
+          <div class="metrics__table-wrap" role="region" aria-label="Monthly credit sales for DSO">
+            <table class="metrics__table" id="sales-table">
+              <thead>
+                <tr>
+                  <th scope="col">Month</th>
+                  <th scope="col">Credit sales billed</th>
+                  <th scope="col">Used in count-back</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="wip" class="section" aria-labelledby="wip-title">
+        <div class="section__intro">
+          <p class="eyebrow">Unbilled backlog</p>
+          <h2 id="wip-title">WIP by engagement</h2>
+          <p class="section__lede">
+            Work delivered or in progress that has not hit an invoice yet—the
+            silent cash drag DSO won’t show.
+          </p>
+        </div>
+        <div class="cash-table-wrap" tabindex="0" role="region" aria-label="Unbilled WIP by engagement">
+          <table class="cash-table o2c-table" id="wip-table">
+            <thead>
+              <tr>
+                <th scope="col" class="cash-table__sticky">Engagement</th>
+                <th scope="col">Type</th>
+                <th scope="col">Unbilled WIP</th>
+                <th scope="col">Days since last bill</th>
+                <th scope="col">Blocker</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="ar" class="section" aria-labelledby="ar-title">
+        <div class="section__intro">
+          <p class="eyebrow">Collections</p>
+          <h2 id="ar-title">AR aging by client</h2>
+          <p class="section__lede">
+            Ending AR split by age bucket. Anything past terms is overdue—start
+            the chase list here.
+          </p>
+        </div>
+        <div class="cash-table-wrap" tabindex="0" role="region" aria-label="AR aging by client">
+          <table class="cash-table o2c-table" id="ar-table">
+            <thead>
+              <tr>
+                <th scope="col" class="cash-table__sticky">Client</th>
+                <th scope="col">Current</th>
+                <th scope="col">1–30</th>
+                <th scope="col">31–60</th>
+                <th scope="col">61–90</th>
+                <th scope="col">90+</th>
+                <th scope="col">Total</th>
+                <th scope="col">Overdue</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="chart-caption" id="ar-caption"></p>
+      </section>
+
+      <section class="section cash-assumptions" aria-labelledby="actions-title">
+        <div class="section__intro">
+          <p class="eyebrow">This week</p>
+          <h2 id="actions-title">Baselining checklist</h2>
+        </div>
+        <ol class="roll-steps">
+          <li>
+            <h3>Draw the map</h3>
+            <p>
+              Interview billing + delivery once. Write the real stages (not the
+              handbook)—especially where AI/tooling cost waits on a monthly
+              invoice.
+            </p>
+          </li>
+          <li>
+            <h3>Timestamp each stage</h3>
+            <p>
+              Pull last 20 invoices: work complete date → invoice date → payment
+              date. Medians become your baseline.
+            </p>
+          </li>
+          <li>
+            <h3>Lock DSO + WIP + overdue</h3>
+            <p>
+              One snapshot in the close pack every month. DSO moves the
+              bill-to-cash lever; WIP aging moves work-to-bill.
+            </p>
+          </li>
+        </ol>
+        <p class="cash-back">
+          <a class="btn btn--primary" href="./index.html#d30">Back to days 1–30</a>
+          <a class="btn btn--ghost" href="./cash-forecast.html">Cash forecast</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__brand">Finance Ops</div>
+      <p>Order-to-cash baseline · DSO · WIP · AR aging</p>
+    </footer>
+
+    <script src="./js/o2c-dso.js"></script>
+  </body>
+</html>
