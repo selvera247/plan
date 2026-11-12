@@ -746,3 +746,291 @@ a:hover {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
+
+/* —— 13-week cash forecast page —— */
+
+.top__brand[href] {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cash-hero {
+  padding: clamp(4rem, 10vh, 6rem) clamp(1rem, 4vw, 2.5rem) 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(90% 80% at 0% 0%, #f7fafb 0%, transparent 55%),
+    linear-gradient(180deg, #f2f5f8 0%, var(--paper) 100%);
+}
+
+.cash-hero__inner {
+  width: min(100%, var(--max));
+  margin-inline: auto;
+}
+
+.cash-hero h1 {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.cash-hero__lede {
+  margin: 1rem 0 0;
+  max-width: 40rem;
+  color: var(--ink-soft);
+  font-size: clamp(1.05rem, 2vw, 1.18rem);
+}
+
+.cash-hero__meta {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cash-kpis {
+  padding-top: 1.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.kpi-strip {
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 900px) {
+  .kpi-strip {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.kpi-strip > div {
+  padding-top: 0.85rem;
+  border-top: 2px solid var(--ink);
+}
+
+.kpi-strip dt {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kpi-strip dd {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.kpi-strip dd.is-warn {
+  color: var(--warn);
+}
+
+.cash-chart {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.cash-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-caption {
+  margin: 0.65rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.25;
+}
+
+.chart-dot {
+  fill: var(--accent);
+}
+
+.chart-dot.is-breach {
+  fill: var(--warn);
+}
+
+.chart-buffer {
+  stroke: var(--warn);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+  opacity: 0.85;
+}
+
+.chart-buffer-label,
+.chart-axis {
+  fill: var(--muted);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.cash-table-wrap {
+  overflow-x: auto;
+  border-top: 2px solid var(--ink);
+  -webkit-overflow-scrolling: touch;
+}
+
+.cash-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.cash-table th,
+.cash-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cash-table thead th {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  vertical-align: bottom;
+}
+
+.cash-table thead th span {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-soft);
+}
+
+.cash-table__sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left !important;
+  background: var(--paper);
+  min-width: 13.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: -0.01em;
+  border-right: 1px solid var(--line);
+}
+
+.cash-table thead .cash-table__sticky {
+  background: var(--paper);
+  z-index: 2;
+}
+
+.cash-table tbody th.cash-table__sticky {
+  color: var(--ink);
+}
+
+.cash-table tr.is-muted th,
+.cash-table tr.is-muted td {
+  color: var(--ink-soft);
+  font-weight: 400;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+}
+
+.cash-table tr.is-strong th,
+.cash-table tr.is-strong td {
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--paper-2) 55%, transparent);
+}
+
+.cash-table tr.is-strong .cash-table__sticky {
+  background: color-mix(in srgb, var(--paper-2) 85%, var(--paper));
+}
+
+.cash-table td.is-neg {
+  color: var(--warn);
+}
+
+.cash-table td.is-breach {
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  color: var(--warn);
+  font-weight: 700;
+}
+
+.roll-steps,
+.assume-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .roll-steps,
+  .assume-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+.roll-steps li,
+.assume-list li {
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.roll-steps h3,
+.assume-list h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.roll-steps p,
+.assume-list p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.cash-footnote {
+  margin: 2rem 0 0;
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.cash-back {
+  margin: 1.75rem 0 0;
+}
+
+.cash-assumptions {
+  padding-bottom: clamp(4rem, 10vh, 6rem);
+}

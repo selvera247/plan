@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>13-week rolling cash forecast — Finance Ops</title>
+    <meta
+      name="description"
+      content="Sample 13-week rolling cash forecast for a small AI-native consulting firm: weekly receipts, disbursements, ending cash, and buffer."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="page-cash">
+    <a class="skip" href="#forecast">Skip to forecast</a>
+
+    <header class="top">
+      <a class="top__brand" href="./index.html">Finance Ops</a>
+      <nav class="top__nav" aria-label="Primary">
+        <a href="./index.html#d30">Back to plan</a>
+        <a href="#forecast">Forecast</a>
+        <a href="#how-rolling">How it rolls</a>
+        <a href="#assumptions">Assumptions</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="cash-hero" aria-labelledby="cash-title">
+        <div class="cash-hero__inner">
+          <p class="eyebrow">Days 1–30 · Cash visibility</p>
+          <h1 id="cash-title">13-week rolling cash forecast</h1>
+          <p class="cash-hero__lede">
+            A weekly picture of cash in, cash out, and ending bank balance for
+            the next quarter. You rebuild it every Monday: drop the week that
+            just closed, add a new thirteenth week, and refresh collections and
+            spend.
+          </p>
+          <p class="cash-hero__meta">
+            Sample firm · ~18 people · project-based AI consulting · USD · as of
+            week of Nov 10, 2026 (America/Chicago)
+          </p>
+        </div>
+      </section>
+
+      <section class="section cash-kpis" aria-label="Forecast snapshot">
+        <dl class="kpi-strip">
+          <div>
+            <dt>Opening cash</dt>
+            <dd id="kpi-opening">—</dd>
+          </div>
+          <div>
+            <dt>Lowest week ending</dt>
+            <dd id="kpi-trough">—</dd>
+          </div>
+          <div>
+            <dt>Cash buffer target</dt>
+            <dd id="kpi-buffer">—</dd>
+          </div>
+          <div>
+            <dt>Weeks below buffer</dt>
+            <dd id="kpi-breach">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="forecast" class="section cash-chart-section" aria-labelledby="chart-title">
+        <div class="section__intro">
+          <p class="eyebrow">Ending cash by week</p>
+          <h2 id="chart-title">Where the balance is headed</h2>
+          <p class="section__lede">
+            Payroll hits every other week. A Helix milestone lands in week 5.
+            Contractors and LLM spend spike in weeks 9–11—watch ending cash
+            fall under the $250k buffer before the Feb collection recovers it.
+          </p>
+        </div>
+        <div class="cash-chart" role="img" aria-labelledby="chart-title chart-caption">
+          <svg id="cash-spark" viewBox="0 0 720 220" preserveAspectRatio="xMidYMid meet"></svg>
+          <p id="chart-caption" class="chart-caption">
+            Sample data · ending cash vs $250k buffer · source: illustrative
+            forecast
+          </p>
+        </div>
+      </section>
+
+      <section class="section cash-table-section" aria-labelledby="table-title">
+        <div class="section__intro">
+          <p class="eyebrow">The artifact</p>
+          <h2 id="table-title">Weekly cash bridge</h2>
+          <p class="section__lede">
+            Rows are the bridge from opening to ending cash. Columns are the
+            next 13 weeks. Scroll sideways on smaller screens.
+          </p>
+        </div>
+
+        <div class="cash-table-wrap" tabindex="0" role="region" aria-label="13-week cash forecast table">
+          <table class="cash-table" id="cash-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="how-rolling" class="section cash-explain" aria-labelledby="rolling-title">
+        <div class="section__intro">
+          <p class="eyebrow">Operating rhythm</p>
+          <h2 id="rolling-title">What “rolling” means in practice</h2>
+        </div>
+        <ol class="roll-steps">
+          <li>
+            <h3>Monday open</h3>
+            <p>
+              Lock actual ending cash from the bank. Replace last week’s
+              forecast with actuals in a variance column (keep history off this
+              sheet).
+            </p>
+          </li>
+          <li>
+            <h3>Shift the window</h3>
+            <p>
+              Delete the week that just ended. Add a new week 13 at the far
+              right. Re-age AR: what you expected to collect this week either
+              arrived or slides forward.
+            </p>
+          </li>
+          <li>
+            <h3>Refresh drivers</h3>
+            <p>
+              Update invoice dates, milestone billings, payroll calendar,
+              contractor draws, and AI/cloud budgets. Flag any week that falls
+              under the buffer.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="assumptions" class="section cash-assumptions" aria-labelledby="assumptions-title">
+        <div class="section__intro">
+          <p class="eyebrow">Sample setup</p>
+          <h2 id="assumptions-title">Assumptions behind this model</h2>
+        </div>
+        <ul class="assume-list">
+          <li>
+            <h3>Inflows</h3>
+            <p>
+              Mix of T&amp;M collections (Net 30), one fixed-fee milestone, and a
+              retainer. No new sales assumed beyond work already in flight.
+            </p>
+          </li>
+          <li>
+            <h3>Outflows</h3>
+            <p>
+              Biweekly payroll, contractors billed weekly, rent on the 1st of
+              the month week, and variable LLM/API spend tagged to delivery.
+            </p>
+          </li>
+          <li>
+            <h3>Buffer</h3>
+            <p>
+              $250k target ≈ roughly four weeks of core burn. Weeks under the
+              line are the ones that force collections or spend cuts.
+            </p>
+          </li>
+        </ul>
+        <p class="cash-footnote">
+          This is an illustrative template for the Finance Ops plan—not live
+          books. Swap in your bank balance, AR aging, and vendor calendar in
+          week one.
+        </p>
+        <p class="cash-back">
+          <a class="btn btn--primary" href="./index.html#d30">Back to days 1–30</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__brand">Finance Ops</div>
+      <p>13-week rolling cash · sample for AI-native consulting</p>
+    </footer>
+
+    <script src="./js/cash-forecast.js"></script>
+  </body>
+</html>
