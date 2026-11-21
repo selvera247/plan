@@ -1265,3 +1265,71 @@ a:hover {
   opacity: 1;
   transform: none;
 }
+
+/* —— Day 1 runbook —— */
+
+.day1-today {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+.day1-today__inner {
+  width: min(100%, var(--max));
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.day1-agenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.day1-agenda > li {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1rem;
+  padding: 1.15rem 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 720px) {
+  .day1-agenda > li {
+    grid-template-columns: 5.5rem 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.day1-agenda__time {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  padding-top: 0.15rem;
+}
+
+.day1-agenda h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.day1-agenda p {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 40rem;
+}
+
+.page-day1 .checklist {
+  margin-top: 2.5rem;
+}
+
+.day1-hero-cta {
+  margin-top: 1.5rem;
+}

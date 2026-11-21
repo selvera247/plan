@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Day 1 — Sr AI Deployment Manager, Finance</title>
+    <meta
+      name="description"
+      content="Day 1 runbook for Sr AI Deployment Manager, Finance. Uses this repo as the operating knowledge: cash, O2C/DSO, and the 30/60/90 plan."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="page-day1">
+    <a class="skip" href="#today">Skip to today’s agenda</a>
+
+    <header class="top">
+      <a class="top__brand" href="./index.html">Finance Ops</a>
+      <nav class="top__nav" aria-label="Primary">
+        <a href="#mandate">Mandate</a>
+        <a href="#today">Today</a>
+        <a href="#knowledge">Knowledge</a>
+        <a href="#ask">Ask for</a>
+        <a href="./index.html">30 / 60 / 90</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="cash-hero" aria-labelledby="day1-title">
+        <div class="cash-hero__inner">
+          <p class="eyebrow">Day 1 · Role onboarding</p>
+          <h1 id="day1-title">Sr AI Deployment Manager, Finance</h1>
+          <p class="cash-hero__lede">
+            This repo is the operating knowledge. Today you don’t automate—you
+            get cash visibility, baseline order-to-cash, and learn how work,
+            invoices, and AI spend actually move.
+          </p>
+          <p class="cash-hero__meta">
+            Protect cash · lean controls · automate later · two-person finance
+            team
+          </p>
+          <div class="hero__cta day1-hero-cta">
+            <a class="btn btn--primary" href="#today">Open today’s agenda</a>
+            <a class="btn btn--ghost" href="./index.html#checklist-30"
+              >30-day checklist</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="mandate" class="section" aria-labelledby="mandate-title">
+        <div class="section__intro">
+          <p class="eyebrow">Why you’re here</p>
+          <h2 id="mandate-title">The job in one sentence</h2>
+          <p class="section__lede">
+            Make finance trustworthy at consulting speed, then deploy AI where
+            it removes repetitive work—without adding headcount or hiding token
+            costs inside project margins.
+          </p>
+        </div>
+        <ol class="pillar-list">
+          <li class="pillar">
+            <span class="pillar__num">01</span>
+            <h3>Stabilize</h3>
+            <p>
+              Cash, O2C, collections, close. Nothing AI-shaped until the process
+              is visible.
+            </p>
+          </li>
+          <li class="pillar">
+            <span class="pillar__num">02</span>
+            <h3>Instrument</h3>
+            <p>
+              Project margin with labor, contractors, and LLM/cloud tagged to
+              engagements.
+            </p>
+          </li>
+          <li class="pillar">
+            <span class="pillar__num">03</span>
+            <h3>Deploy</h3>
+            <p>
+              Invoice drafts, reminders, expense coding, recon, anomaly flags—
+              only after the path is clean.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="today" class="section phase--alt day1-today" aria-labelledby="today-title">
+        <div class="day1-today__inner">
+          <div class="section__intro">
+            <p class="eyebrow">First eight hours</p>
+            <h2 id="today-title">Today’s agenda</h2>
+            <p class="section__lede">
+              Finish with three numbers you trust: opening cash, unbilled WIP,
+              and overdue AR—and a named owner for revenue vs. cost.
+            </p>
+          </div>
+
+          <ol class="day1-agenda" id="day1-agenda">
+            <li>
+              <div class="day1-agenda__time">09:00</div>
+              <div>
+                <h3>Access &amp; people</h3>
+                <p>
+                  Bank portal, GL / billing tool, payroll, expense system, LLM
+                  admin or usage export. Meet the other finance seat—agree who
+                  owns revenue vs. cost (segregation of duties).
+                </p>
+              </div>
+            </li>
+            <li>
+              <div class="day1-agenda__time">10:30</div>
+              <div>
+                <h3>Cash snapshot</h3>
+                <p>
+                  Pull today’s bank balance. Start the
+                  <a href="./cash-forecast.html">13-week rolling forecast</a>
+                  skeleton: opening cash, known payroll dates, rent, large AP.
+                  Don’t perfect it—frame it.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div class="day1-agenda__time">13:00</div>
+              <div>
+                <h3>Baseline O2C</h3>
+                <p>
+                  Walk one T&amp;M and one milestone deal from work → invoice →
+                  cash. Timestamp the stages using the
+                  <a href="./o2c-dso.html">O2C map</a>. Note where AI usage waits
+                  to be coded to a job.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div class="day1-agenda__time">15:00</div>
+              <div>
+                <h3>Measure DSO &amp; overdue</h3>
+                <p>
+                  Ending AR, count-back DSO, AR aging by client, unbilled WIP
+                  list. Build tomorrow’s chase list from anything past terms.
+                  Template:
+                  <a href="./o2c-dso.html#dso">DSO + aging</a>.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div class="day1-agenda__time">16:30</div>
+              <div>
+                <h3>Close the day</h3>
+                <p>
+                  Write: what you know, what you don’t, who owes you a file by
+                  Friday. Tick what you can on the
+                  <a href="./index.html#checklist-30">first-30 checklist</a>.
+                  Schedule the AI/software spend inventory for this week—not
+                  today.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="knowledge" class="section" aria-labelledby="knowledge-title">
+        <div class="section__intro">
+          <p class="eyebrow">Repo = knowledge</p>
+          <h2 id="knowledge-title">Open these in order</h2>
+        </div>
+        <div class="phase__grid">
+          <article class="workblock">
+            <h3>1. 30 / 60 / 90</h3>
+            <p>
+              Full operating plan: stabilize → build engine → strategic partner.
+              <a href="./index.html">Open the plan →</a>
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>2. Cash forecast</h3>
+            <p>
+              The artifact leadership will ask for first. Weekly bridge vs
+              buffer.
+              <a href="./cash-forecast.html">Open the sample →</a>
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>3. O2C + DSO</h3>
+            <p>
+              Work-to-bill vs bill-to-cash, count-back DSO, WIP, AR aging.
+              <a href="./o2c-dso.html">Open the baseline →</a>
+            </p>
+          </article>
+          <article class="workblock">
+            <h3>4. Days 31–90</h3>
+            <p>
+              Automation, project profitability (incl. tokens), pricing, and
+              scale readiness—after week-one numbers exist.
+              <a href="./index.html#d60">Jump to build →</a>
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="ask" class="section" aria-labelledby="ask-title">
+        <div class="section__intro">
+          <p class="eyebrow">Blockers to clear today</p>
+          <h2 id="ask-title">Ask for these before you leave</h2>
+        </div>
+        <ul class="assume-list">
+          <li>
+            <h3>Systems</h3>
+            <p>
+              Read access to bank, GL, billing, payroll, expenses, and any LLM /
+              cloud console that invoices the firm.
+            </p>
+          </li>
+          <li>
+            <h3>Files</h3>
+            <p>
+              Latest AR aging, open WIP / unbilled report, vendor list, and the
+              last two month-end close packs (even if messy).
+            </p>
+          </li>
+          <li>
+            <h3>Decisions</h3>
+            <p>
+              Named revenue owner vs. cost owner, payment approval threshold, and
+              who can speak to clients about overdue invoices.
+            </p>
+          </li>
+        </ul>
+
+        <div class="checklist is-inview" id="day1-checklist">
+          <div class="checklist__head">
+            <h3>Day 1 done-when</h3>
+            <p>Local checklist—separate from the 30-day list.</p>
+          </div>
+          <ul class="checklist__list" role="list">
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1a" /> Bank + billing + GL
+                access confirmed</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1b" /> Revenue vs. cost owner
+                named</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1c" /> Opening cash on the
+                13-week sheet</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1d" /> O2C walked on one T&amp;M
+                and one milestone</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1e" /> DSO + overdue AR + WIP
+                snapshot written down</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="d1f" /> Friday ask-list sent
+                (files / access still missing)</label
+              >
+            </li>
+          </ul>
+          <p class="checklist__progress" aria-live="polite">
+            <span data-done>0</span> of <span data-total>6</span> complete
+          </p>
+        </div>
+
+        <p class="cash-back">
+          <a class="btn btn--primary" href="./cash-forecast.html"
+            >Start with cash</a
+          >
+          <a class="btn btn--ghost" href="./o2c-dso.html">Then O2C / DSO</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__brand">Finance Ops</div>
+      <p>Day 1 · Sr AI Deployment Manager, Finance · repo as knowledge</p>
+    </footer>
+
+    <script src="./js/day-1.js"></script>
+  </body>
+</html>
