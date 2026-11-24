@@ -1,0 +1,8 @@
+date,amount,reference,description
+2024-01-05,1250.00,INV-1001,Customer payment Acme Corp
+2024-01-08,340.50,CHK-2201,Office supplies vendor
+2024-01-12,8900.00,WIRE-55,Payroll funding
+2024-01-15,125.00,ACH-901,Software subscription
+2024-01-18,2100.75,INV-1002,Customer payment Beta LLC
+2024-01-22,75.25,POS-441,Team lunch
+2024-01-28,450.00,CHK-2208,Utilities payment

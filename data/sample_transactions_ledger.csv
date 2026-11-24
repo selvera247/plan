@@ -1,0 +1,8 @@
+date,amount,reference,description
+2024-01-05,1250.00,INV-1001,AR receipt Acme Corp
+2024-01-08,340.50,CHK-2201,AP office supplies
+2024-01-12,8900.00,WIRE-55,Payroll transfer
+2024-01-15,125.00,ACH-901,SaaS expense
+2024-01-18,2100.00,INV-1002,AR receipt Beta LLC
+2024-01-22,75.25,POS-441,Meals expense
+2024-01-30,200.00,CHK-2210,Parking permit
