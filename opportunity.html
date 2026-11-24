@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Discovery opportunity tracker — Finance Ops</title>
+    <meta
+      name="description"
+      content="Track a discovery opportunity and the finance readiness checklist if we win: billing model, cash impact, O2C setup, AI cost tagging."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="page-opp">
+    <a class="skip" href="#tracker">Skip to tracker</a>
+
+    <header class="top">
+      <a class="top__brand" href="./index.html">Finance Ops</a>
+      <nav class="top__nav" aria-label="Primary">
+        <a href="./day-1.html">Day 1</a>
+        <a href="#tracker">Opportunity</a>
+        <a href="#if-win">If we win</a>
+        <a href="#cash-impact">Cash impact</a>
+        <a href="./cash-forecast.html">Cash</a>
+        <a href="./o2c-dso.html">O2C / DSO</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="cash-hero" aria-labelledby="opp-title">
+        <div class="cash-hero__inner">
+          <p class="eyebrow">Pipeline · Finance readiness</p>
+          <h1 id="opp-title">Discovery opportunity</h1>
+          <p class="cash-hero__lede">
+            First live shot to track. Capture the deal now; pre-wire cash,
+            billing, and AI cost tagging so a win doesn’t create unbilled WIP
+            and a messy O2C path.
+          </p>
+          <p class="cash-hero__meta">
+            Status: discovery · saved on this device · feed the 13-week when
+            probability or close date moves
+          </p>
+        </div>
+      </section>
+
+      <section id="tracker" class="section" aria-labelledby="tracker-title">
+        <div class="section__intro">
+          <p class="eyebrow">Deal card</p>
+          <h2 id="tracker-title">What we know today</h2>
+          <p class="section__lede">
+            Edit and save. Nothing leaves this browser—treat it as your working
+            note until it’s in the CRM / GL.
+          </p>
+        </div>
+
+        <form class="opp-form" id="opp-form" novalidate>
+          <div class="opp-form__grid">
+            <label>
+              <span>Opportunity name</span>
+              <input name="name" type="text" required autocomplete="off" />
+            </label>
+            <label>
+              <span>Client / account</span>
+              <input name="client" type="text" required autocomplete="organization" />
+            </label>
+            <label>
+              <span>Stage</span>
+              <select name="stage">
+                <option value="discovery">Discovery</option>
+                <option value="proposal">Proposal</option>
+                <option value="negotiation">Negotiation</option>
+                <option value="verbal">Verbal commit</option>
+                <option value="won">Won</option>
+                <option value="lost">Lost</option>
+              </select>
+            </label>
+            <label>
+              <span>Billing model</span>
+              <select name="billing">
+                <option value="discovery-fixed">Discovery · fixed fee</option>
+                <option value="tm">T&amp;M</option>
+                <option value="milestone">Milestone / fixed</option>
+                <option value="retainer">Retainer</option>
+                <option value="outcome">Outcome / value-based</option>
+              </select>
+            </label>
+            <label>
+              <span>Estimated fee (USD)</span>
+              <input name="fee" type="number" min="0" step="1000" required />
+            </label>
+            <label>
+              <span>Win probability (%)</span>
+              <input name="probability" type="number" min="0" max="100" step="5" required />
+            </label>
+            <label>
+              <span>Expected close</span>
+              <input name="closeDate" type="date" required />
+            </label>
+            <label>
+              <span>Payment terms</span>
+              <select name="terms">
+                <option value="net30">Net 30</option>
+                <option value="net15">Net 15</option>
+                <option value="net45">Net 45</option>
+                <option value="50-50">50% start / 50% complete</option>
+                <option value="milestone">Per milestone</option>
+              </select>
+            </label>
+            <label class="opp-form__full">
+              <span>Scope note (discovery outcome)</span>
+              <textarea
+                name="scope"
+                rows="3"
+                placeholder="What “done” means, who signs acceptance, any AI/tooling pass-through…"
+              ></textarea>
+            </label>
+            <label class="opp-form__full">
+              <span>Finance risks / open questions</span>
+              <textarea
+                name="risks"
+                rows="3"
+                placeholder="PO required? Credit check? Who owns LLM spend? Concentration with this logo?"
+              ></textarea>
+            </label>
+          </div>
+          <div class="opp-form__actions">
+            <button type="submit" class="btn btn--primary">Save opportunity</button>
+            <button type="button" class="btn btn--ghost" id="opp-reset">
+              Reset to sample
+            </button>
+            <p class="opp-form__status" id="opp-status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <dl class="kpi-strip opp-kpis" aria-label="Weighted pipeline view">
+          <div>
+            <dt>Fee</dt>
+            <dd id="kpi-fee">—</dd>
+          </div>
+          <div>
+            <dt>Weighted value</dt>
+            <dd id="kpi-weighted">—</dd>
+          </div>
+          <div>
+            <dt>Est. cash in (if won)</dt>
+            <dd id="kpi-cashin">—</dd>
+          </div>
+          <div>
+            <dt>Stage</dt>
+            <dd id="kpi-stage">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="cash-impact" class="section phase--alt opp-cash" aria-labelledby="cash-title">
+        <div class="opp-cash__inner">
+          <div class="section__intro">
+            <p class="eyebrow">13-week link</p>
+            <h2 id="cash-title">Cash impact if we win</h2>
+            <p class="section__lede">
+              Rough placement on the rolling forecast. Discovery fixed fees
+              often bill at kickoff + completion—don’t wait for “won” to sketch
+              the weeks.
+            </p>
+          </div>
+          <div class="opp-cash__panel" id="cash-panel"></div>
+          <p class="chart-caption">
+            Illustrative only · refine dates when SOW is signed ·
+            <a href="./cash-forecast.html">open the 13-week model</a>
+          </p>
+        </div>
+      </section>
+
+      <section id="if-win" class="section" aria-labelledby="win-title">
+        <div class="section__intro">
+          <p class="eyebrow">Win readiness</p>
+          <h2 id="win-title">If we win — finance checklist</h2>
+          <p class="section__lede">
+            Run this the day stage flips to won (or verbal). Same two-person
+            split: revenue owner stands up billing; cost owner stands up job
+            codes and AI spend.
+          </p>
+        </div>
+
+        <div class="checklist is-inview" id="win-checklist">
+          <div class="checklist__head">
+            <h3>Day-of-win actions</h3>
+            <p>Progress stays on this device with the opportunity card.</p>
+          </div>
+          <ul class="checklist__list" role="list">
+            <li>
+              <label
+                ><input type="checkbox" data-key="w1" /> Contract / SOW filed
+                with clear payment terms and acceptance criteria</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w2" /> Job / engagement code
+                created; billing model set (discovery fee schedule)</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w3" /> Kickoff invoice drafted
+                (or milestone 1) and sent within 48 hours</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w4" /> Add expected receipts to
+                the 13-week cash forecast</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w5" /> WIP rules set: who
+                approves time / discovery deliverable for billing</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w6" /> AI / LLM / cloud costs
+                tagged to this engagement from day one</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w7" /> Collections owner named;
+                reminder dates on the calendar</label
+              >
+            </li>
+            <li>
+              <label
+                ><input type="checkbox" data-key="w8" /> Margin target noted
+                (labor + contractors + tokens) before delivery ramps</label
+              >
+            </li>
+          </ul>
+          <p class="checklist__progress" aria-live="polite">
+            <span data-done>0</span> of <span data-total>8</span> complete
+          </p>
+        </div>
+      </section>
+
+      <section class="section cash-assumptions" aria-labelledby="next-title">
+        <div class="section__intro">
+          <p class="eyebrow">Operating rhythm</p>
+          <h2 id="next-title">Until it’s won</h2>
+        </div>
+        <ol class="roll-steps">
+          <li>
+            <h3>Weekly</h3>
+            <p>
+              Update stage and probability. If close date slips, move the cash
+              sketch—don’t leave phantom receipts in week 3.
+            </p>
+          </li>
+          <li>
+            <h3>On proposal</h3>
+            <p>
+              Lock payment terms before legal polish. Discovery that bills only
+              at the end creates WIP and DSO drag.
+            </p>
+          </li>
+          <li>
+            <h3>On win</h3>
+            <p>
+              Run the checklist the same day. Then fold the engagement into
+              <a href="./o2c-dso.html">O2C / DSO</a> like any other job.
+            </p>
+          </li>
+        </ol>
+        <p class="cash-back">
+          <a class="btn btn--primary" href="./day-1.html">Back to Day 1</a>
+          <a class="btn btn--ghost" href="./cash-forecast.html">Cash forecast</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__brand">Finance Ops</div>
+      <p>Discovery opportunity · track now · finance-ready on win</p>
+    </footer>
+
+    <script src="./js/opportunity.js"></script>
+  </body>
+</html>
