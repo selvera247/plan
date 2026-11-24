@@ -7,6 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
+from logic.common import coerce_float
 from logic.reconcile import reconcile_transactions
 from logic.variance import analyze_variance
 from project_paths import DATA_DIR, ROOT
@@ -19,31 +20,64 @@ SOURCE_ALIASES: dict[str, Path] = {
 }
 
 
-def resolve_data_path(source: str) -> Path:
-    key = source.strip().lower()
+def resolve_data_path(source: str | None) -> Path:
+    if source is None or not str(source).strip():
+        raise ValueError(
+            "Empty data source. Pass a CSV path or one of: "
+            + ", ".join(sorted(SOURCE_ALIASES))
+        )
+
+    key = str(source).strip().lower()
     if key in SOURCE_ALIASES:
-        return SOURCE_ALIASES[key]
-    path = Path(source)
-    return path if path.is_absolute() else ROOT / path
+        path = SOURCE_ALIASES[key]
+    else:
+        path = Path(source)
+        if not path.is_absolute():
+            path = ROOT / path
+
+    if path.is_dir():
+        raise ValueError(
+            f"Data source resolves to a directory, not a file: {path}. "
+            f"Known aliases: {', '.join(sorted(SOURCE_ALIASES))}"
+        )
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Data file not found: {path}. "
+            f"Known aliases: {', '.join(sorted(SOURCE_ALIASES))}"
+        )
+    return path
 
 
 def _run_reconcile(args: dict[str, Any]) -> dict[str, Any]:
+    if "left_source" not in args or "right_source" not in args:
+        raise ValueError("reconcile_transactions requires left_source and right_source")
     return reconcile_transactions(
-        resolve_data_path(args["left_source"]),
-        resolve_data_path(args["right_source"]),
-        amount_tolerance=float(args.get("amount_tolerance", 0.01)),
-        left_label=args.get("left_label", "bank"),
-        right_label=args.get("right_label", "ledger"),
+        resolve_data_path(args.get("left_source")),
+        resolve_data_path(args.get("right_source")),
+        amount_tolerance=coerce_float(
+            args.get("amount_tolerance"), default=0.01, name="amount_tolerance"
+        ),
+        left_label=str(args.get("left_label") or "bank"),
+        right_label=str(args.get("right_label") or "ledger"),
     )
 
 
 def _run_variance(args: dict[str, Any]) -> dict[str, Any]:
-    threshold_abs = args.get("threshold_abs")
+    if "actuals_source" not in args or "budget_source" not in args:
+        raise ValueError("analyze_variance requires actuals_source and budget_source")
+    threshold_abs_raw = args.get("threshold_abs")
+    threshold_abs = (
+        None
+        if threshold_abs_raw is None or threshold_abs_raw == ""
+        else float(threshold_abs_raw)
+    )
     return analyze_variance(
-        resolve_data_path(args["actuals_source"]),
-        resolve_data_path(args["budget_source"]),
-        threshold_pct=float(args.get("threshold_pct", 5.0)),
-        threshold_abs=None if threshold_abs is None else float(threshold_abs),
+        resolve_data_path(args.get("actuals_source")),
+        resolve_data_path(args.get("budget_source")),
+        threshold_pct=coerce_float(
+            args.get("threshold_pct"), default=5.0, name="threshold_pct"
+        ),
+        threshold_abs=threshold_abs,
     )
 
 

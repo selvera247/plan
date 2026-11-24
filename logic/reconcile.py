@@ -7,21 +7,24 @@ with a configurable amount tolerance. Pure function — no LLM math.
 
 from __future__ import annotations
 
-import csv
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Mapping, Sequence, Union
 
 from .common import (
+    amounts_within_tolerance,
     find_column,
     make_lineage,
+    normalize_row,
     parse_amount,
     parse_date,
+    read_csv_rows,
+    require_non_negative,
     round_money,
 )
 
 WORKFLOW_NAME = "reconcile_transactions"
-WORKFLOW_VERSION = "1.0.0"
+WORKFLOW_VERSION = "1.0.1"
 
 TransactionLike = Mapping[str, Any]
 SourceInput = Union[Sequence[TransactionLike], str, Path]
@@ -32,38 +35,35 @@ _REF_KEYS = ("reference", "Reference", "ref", "check_number", "id")
 
 
 def _normalize_transaction(raw: Mapping[str, Any], *, source: str, index: int) -> dict[str, Any]:
-    amount_key = find_column(raw, _AMOUNT_KEYS)
-    date_key = find_column(raw, _DATE_KEYS)
-    ref_key = find_column(raw, _REF_KEYS)
+    original = dict(raw)
+    row = normalize_row(raw)
+    amount_key = find_column(row, _AMOUNT_KEYS)
+    date_key = find_column(row, _DATE_KEYS)
+    ref_key = find_column(row, _REF_KEYS)
     if amount_key is None or date_key is None or ref_key is None:
         raise ValueError(
-            f"Transaction missing required fields (amount/date/reference): {dict(raw)}"
+            "Transaction missing required fields (amount/date/reference): "
+            f"{original}"
         )
     return {
         "source": source,
         "index": index,
-        "amount": parse_amount(raw[amount_key]),
-        "date": parse_date(raw[date_key]).isoformat(),
-        "reference": str(raw[ref_key]).strip().upper(),
-        "description": str(raw.get("description") or raw.get("Description") or ""),
-        "raw": dict(raw),
+        "amount": parse_amount(row[amount_key]),
+        "date": parse_date(row[date_key]).isoformat(),
+        "reference": str(row[ref_key]).strip().upper(),
+        "description": str(row.get("description") or row.get("Description") or ""),
+        "raw": original,
     }
 
 
 def _load_transactions(source: SourceInput, *, label: str) -> list[dict[str, Any]]:
     if isinstance(source, (str, Path)):
-        path = Path(source)
-        with path.open(newline="", encoding="utf-8") as handle:
-            rows = list(csv.DictReader(handle))
+        rows = read_csv_rows(source)
         return [_normalize_transaction(row, source=label, index=i) for i, row in enumerate(rows)]
 
     return [
         _normalize_transaction(row, source=label, index=i) for i, row in enumerate(source)
     ]
-
-
-def _amounts_match(a: float, b: float, tolerance: float) -> bool:
-    return abs(a - b) <= tolerance
 
 
 def _match_key(txn: Mapping[str, Any]) -> tuple[str, str]:
@@ -88,6 +88,8 @@ def reconcile_transactions(
 
     Returns a structured summary including lineage metadata.
     """
+    amount_tolerance = require_non_negative("amount_tolerance", float(amount_tolerance))
+
     left_txns = _load_transactions(left, label=left_label)
     right_txns = _load_transactions(right, label=right_label)
 
@@ -106,7 +108,9 @@ def reconcile_transactions(
         for i in buckets.get(_match_key(left_txn), []):
             if used[i]:
                 continue
-            if _amounts_match(left_txn["amount"], right_txns[i]["amount"], amount_tolerance):
+            if amounts_within_tolerance(
+                left_txn["amount"], right_txns[i]["amount"], amount_tolerance
+            ):
                 match_idx = i
                 break
 

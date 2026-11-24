@@ -77,13 +77,7 @@ def record_tool_call(
             json.dumps(arguments),
             record["duration_ms"],
         )
-    else:
-        logger.error(
-            "TOOL_CALL_FAILED name=%s args=%s error=%s",
-            tool,
-            arguments,
-            error,
-        )
+    # Error logging is owned by execute_tool so validation failures are not double-logged.
 
     _TOOL_CALL_LOG.append(record)
     return record
