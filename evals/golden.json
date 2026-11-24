@@ -3,6 +3,10 @@
     "id": "recon_01",
     "question": "Reconcile the sample bank and ledger transactions. How many matched, and what is the total variance?",
     "expected_tool": "reconcile_transactions",
+    "tool_args": {
+      "left_source": "sample_bank",
+      "right_source": "sample_ledger"
+    },
     "expected_values": {
       "matched_count": 5,
       "unmatched_left_count": 2,
@@ -10,12 +14,16 @@
       "totals.total_variance": 250.75
     },
     "require_lineage": true,
-    "notes": "Default 0.01 tolerance: INV-1002 differs by 0.75 so both sides unmatched; CHK-2208 bank-only; CHK-2210 ledger-only. matched=5, unmatched_left=2, unmatched_right=2, total_variance=250.75."
+    "notes": "Default 0.01 tolerance: INV-1002 differs by 0.75 so both sides unmatched; CHK-2208 bank-only; CHK-2210 ledger-only."
   },
   {
     "id": "recon_02",
     "question": "Using sample_bank and sample_ledger, which bank transactions did not match the ledger?",
     "expected_tool": "reconcile_transactions",
+    "tool_args": {
+      "left_source": "sample_bank",
+      "right_source": "sample_ledger"
+    },
     "expected_values": {
       "matched_count": 5,
       "unmatched_left_count": 2
@@ -26,6 +34,11 @@
     "id": "recon_03",
     "question": "Run reconciliation on the demo bank vs ledger files with amount_tolerance 1.00. How many matched?",
     "expected_tool": "reconcile_transactions",
+    "tool_args": {
+      "left_source": "sample_bank",
+      "right_source": "sample_ledger",
+      "amount_tolerance": 1.0
+    },
     "expected_values": {
       "matched_count": 6,
       "unmatched_left_count": 1,
@@ -38,6 +51,10 @@
     "id": "var_01",
     "question": "Using sample actuals and budget, what is the overall absolute and percent variance?",
     "expected_tool": "analyze_variance",
+    "tool_args": {
+      "actuals_source": "sample_actuals",
+      "budget_source": "sample_budget"
+    },
     "expected_values": {
       "totals.absolute_variance": 9550.0,
       "totals.percent_variance": 4.407,
@@ -49,6 +66,10 @@
     "id": "var_02",
     "question": "Which accounts are flagged when comparing sample_actuals to sample_budget at the default 5% threshold?",
     "expected_tool": "analyze_variance",
+    "tool_args": {
+      "actuals_source": "sample_actuals",
+      "budget_source": "sample_budget"
+    },
     "expected_values": {
       "flagged_count": 6
     },
@@ -59,6 +80,10 @@
     "id": "var_03",
     "question": "What is the percent variance for Marketing in the sample actuals vs budget?",
     "expected_tool": "analyze_variance",
+    "tool_args": {
+      "actuals_source": "sample_actuals",
+      "budget_source": "sample_budget"
+    },
     "expected_values": {
       "item_count": 8
     },
@@ -73,6 +98,10 @@
     "id": "var_04",
     "question": "Are salaries over or under budget in the sample data, and by how much?",
     "expected_tool": "analyze_variance",
+    "tool_args": {
+      "actuals_source": "sample_actuals",
+      "budget_source": "sample_budget"
+    },
     "expected_values": {},
     "expected_item": {
       "account": "Salaries",
@@ -85,6 +114,10 @@
     "id": "routing_01",
     "question": "I need a budget-vs-actual variance report for our sample finance files.",
     "expected_tool": "analyze_variance",
+    "tool_args": {
+      "actuals_source": "sample_actuals",
+      "budget_source": "sample_budget"
+    },
     "expected_values": {
       "item_count": 8
     },
@@ -94,6 +127,10 @@
     "id": "routing_02",
     "question": "Please match bank feed transactions to the general ledger using the sample CSVs.",
     "expected_tool": "reconcile_transactions",
+    "tool_args": {
+      "left_source": "sample_bank",
+      "right_source": "sample_ledger"
+    },
     "expected_values": {
       "matched_count": 5
     },
