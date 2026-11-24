@@ -1333,3 +1333,123 @@ a:hover {
 .day1-hero-cta {
   margin-top: 1.5rem;
 }
+
+/* —— Opportunity tracker —— */
+
+.opp-form {
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--ink);
+}
+
+.opp-form__grid {
+  display: grid;
+  gap: 1rem 1.25rem;
+}
+
+@media (min-width: 720px) {
+  .opp-form__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.opp-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.opp-form__full {
+  grid-column: 1 / -1;
+}
+
+.opp-form input,
+.opp-form select,
+.opp-form textarea {
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 0.15rem;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.opp-form textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.opp-form input:focus,
+.opp-form select:focus,
+.opp-form textarea:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+.opp-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+}
+
+.opp-form__actions .btn {
+  cursor: pointer;
+  border-style: solid;
+}
+
+.opp-form__status {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+
+.opp-kpis {
+  margin-top: 2rem;
+}
+
+.opp-cash {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+.opp-cash__inner {
+  width: min(100%, var(--max));
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.opp-cash__lead {
+  margin: 0 0 1rem;
+  color: var(--ink-soft);
+  max-width: 42rem;
+}
+
+.page-opp .metrics__table tbody tr {
+  opacity: 1;
+  transform: none;
+}
+
+.page-opp .metrics__table td:last-child {
+  white-space: normal;
+  max-width: 18rem;
+  text-align: left;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 400;
+}

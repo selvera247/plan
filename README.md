@@ -18,6 +18,7 @@ Operating knowledge for **Sr AI Deployment Manager, Finance** on a two-person fi
 | [index.html](./index.html) | Days 1–90 | Full 30 / 60 / 90 plan + first-30 checklist |
 | [cash-forecast.html](./cash-forecast.html) | Day 1 morning | Sample 13-week rolling cash forecast |
 | [o2c-dso.html](./o2c-dso.html) | Day 1 afternoon | O2C baseline, count-back DSO, WIP, AR aging |
+| [opportunity.html](./opportunity.html) | When pipeline moves | Discovery opportunity card, cash-if-won sketch, win checklist |
 
 ## Open locally
 
