@@ -45,7 +45,7 @@ Requires a single `OPENAI_API_KEY`. Optional: `OPENAI_MODEL` (default `gpt-4o-mi
 
 ## Workflows
 
-### 1. Reconciliation — `logic/reconcile.py` v1.0.0
+### 1. Reconciliation — `logic/reconcile.py` v1.0.1
 
 Matches two transaction sets on **amount + date + reference** (configurable amount tolerance). Returns matched/unmatched counts, items, total variance, and lineage.
 
@@ -60,7 +60,7 @@ result = reconcile_transactions(
 print(result["matched_count"], result["totals"]["total_variance"], result["lineage"])
 ```
 
-### 2. Variance analysis — `logic/variance.py` v1.0.0
+### 2. Variance analysis — `logic/variance.py` v1.0.1
 
 Compares actuals vs budget by account; flags items above a % (and optional absolute) threshold.
 
@@ -163,6 +163,13 @@ Results are written to `logs/eval_results.json`.
 └── .env.example
 ```
 
+## Tests
+
+```bash
+python3 -m unittest tests.test_edge_cases -v
+python3 evals/run_evals.py --logic-only
+```
+
 ## Why this matters
 
 In production finance teams, **numbers must come from versioned, testable logic** — not from an LLM’s next-token guess. This prototype shows the control plane in miniature:
@@ -171,3 +178,12 @@ In production finance teams, **numbers must come from versioned, testable logic*
 2. The LLM is a conversational router + narrator.  
 3. Lineage travels with every answer.  
 4. Evals catch tool mis-routing and numeric drift.
+
+### Production hardening notes (v1.0.1)
+
+- Optional tool numerics treat JSON `null` as the documented default (LLMs often send nulls).
+- Invalid tool-argument JSON is caught and returned as an error payload (no process crash).
+- CSV reads use `utf-8-sig` + header normalization (BOM / casing).
+- Amounts accept accounting parentheses, e.g. `(1,250.00)`.
+- Tolerances/thresholds must be `>= 0`; money compares use decimal quantization.
+- Missing/empty sources return actionable errors that list known demo aliases.

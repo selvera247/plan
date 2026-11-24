@@ -7,14 +7,20 @@ threshold. Pure function — no LLM math.
 
 from __future__ import annotations
 
-import csv
 from pathlib import Path
 from typing import Any, Mapping, Union
 
-from .common import find_column, make_lineage, parse_amount, round_money
+from .common import (
+    find_column,
+    make_lineage,
+    parse_amount,
+    read_csv_rows,
+    require_non_negative,
+    round_money,
+)
 
 WORKFLOW_NAME = "analyze_variance"
-WORKFLOW_VERSION = "1.0.0"
+WORKFLOW_VERSION = "1.0.1"
 
 AmountMap = Mapping[str, Any]
 SourceInput = Union[AmountMap, str, Path]
@@ -34,10 +40,7 @@ def _load_amount_map(source: SourceInput) -> dict[str, float]:
     if isinstance(source, Mapping):
         return {str(k): parse_amount(v, empty_as_zero=True) for k, v in source.items()}
 
-    path = Path(source)
-    with path.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.DictReader(handle))
-
+    rows = read_csv_rows(source)
     if not rows:
         return {}
 
@@ -81,6 +84,10 @@ def analyze_variance(
     An item is flagged when |% variance| >= ``threshold_pct``, or when
     ``threshold_abs`` is set and |absolute variance| >= that value.
     """
+    threshold_pct = require_non_negative("threshold_pct", float(threshold_pct))
+    if threshold_abs is not None:
+        threshold_abs = require_non_negative("threshold_abs", float(threshold_abs))
+
     actual_map = _load_amount_map(actuals)
     budget_map = _load_amount_map(budget)
     accounts = sorted(set(actual_map) | set(budget_map))

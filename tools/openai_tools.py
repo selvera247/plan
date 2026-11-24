@@ -34,12 +34,38 @@ __all__ = [
 ]
 
 
+def _parse_arguments(arguments: dict[str, Any] | str) -> dict[str, Any]:
+    if isinstance(arguments, dict):
+        return arguments
+    if not isinstance(arguments, str):
+        raise TypeError(f"Tool arguments must be dict or JSON string, got {type(arguments)}")
+    if not arguments.strip():
+        return {}
+    try:
+        parsed = json.loads(arguments)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid tool arguments JSON: {exc.msg}") from exc
+    if not isinstance(parsed, dict):
+        raise ValueError("Tool arguments JSON must be an object")
+    return parsed
+
+
 def execute_tool(name: str, arguments: dict[str, Any] | str) -> dict[str, Any]:
     """Execute a named tool and record the call for auditability."""
-    if isinstance(arguments, str):
-        arguments = json.loads(arguments) if arguments.strip() else {}
-
     started = datetime.now(timezone.utc)
+    try:
+        arguments = _parse_arguments(arguments)
+    except (TypeError, ValueError) as exc:
+        record_tool_call(
+            tool=name,
+            arguments={"raw": arguments} if not isinstance(arguments, dict) else arguments,
+            status="error",
+            started_at=started,
+            error=str(exc),
+        )
+        logger.error("TOOL_CALL_FAILED name=%s error=%s", name, exc)
+        return {"error": str(exc), "lineage": None}
+
     if name not in HANDLERS:
         error = f"Unknown tool: {name}"
         record_tool_call(
@@ -49,6 +75,7 @@ def execute_tool(name: str, arguments: dict[str, Any] | str) -> dict[str, Any]:
             started_at=started,
             error=error,
         )
+        logger.error("TOOL_CALL_FAILED name=%s error=%s", name, error)
         return {"error": error, "lineage": None}
 
     try:
@@ -69,5 +96,10 @@ def execute_tool(name: str, arguments: dict[str, Any] | str) -> dict[str, Any]:
             started_at=started,
             error=str(exc),
         )
-        logger.exception("TOOL_CALL_FAILED name=%s args=%s", name, arguments)
+        # Validation / missing-file errors are expected in production traffic;
+        # reserve stack traces for unexpected failures.
+        if isinstance(exc, (ValueError, TypeError, FileNotFoundError, OSError)):
+            logger.error("TOOL_CALL_FAILED name=%s args=%s error=%s", name, arguments, exc)
+        else:
+            logger.exception("TOOL_CALL_FAILED name=%s args=%s", name, arguments)
         return {"error": str(exc), "lineage": None}
