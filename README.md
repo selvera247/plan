@@ -9,21 +9,26 @@ This simulates a “data/logic → AI” pattern (similar in spirit to governed 
 ```
 User question
     ↓
-OpenAI assistant (Chat Completions + function calling)
+OpenAI assistant (assistant/agent.py — Chat Completions + function calling)
     ↓  must call tools for any numeric / rule-based ask
-Tool layer (tools/openai_tools.py)  ←── also exposed via FastMCP (tools/mcp_server.py)
+Tool facade (tools/openai_tools.py)
+    ├── registry (schemas, aliases, handlers)
+    ├── audit log (logs/tool_calls.log)
+    └── FastMCP exposure (tools/mcp_server.py)
     ↓
 Deterministic logic (logic/reconcile.py, logic/variance.py)
+    └── shared helpers (logic/common.py — lineage, parsing)
     ↓
-Structured result + lineage  →  logged to logs/tool_calls.log
+Structured result + lineage
 ```
 
 | Layer | Role |
 |-------|------|
-| `logic/` | Pure Python “governed workflows” — reconciliation & variance |
-| `tools/` | OpenAI tool schemas + local runner; optional FastMCP server |
+| `logic/` | Pure workflows + shared `common` helpers (lineage, parsing) |
+| `tools/` | Registry, audit, OpenAI facade, optional FastMCP server |
 | `assistant/` | System-prompted agent that refuses to do finance math itself |
-| `evals/` | Golden questions + scoring (tool routing, numbers, lineage) |
+| `evals/` | Golden questions (`tool_args` + expectations) + scoring module |
+| `project_paths.py` | Repo root / data / log path constants |
 | `data/` | Small realistic sample CSVs |
 
 ## Setup
@@ -130,17 +135,22 @@ Results are written to `logs/eval_results.json`.
 
 ```
 /
+├── project_paths.py
 ├── logic/
+│   ├── common.py
 │   ├── reconcile.py
 │   ├── variance.py
 │   └── __init__.py
 ├── tools/
+│   ├── registry.py
+│   ├── audit.py
 │   ├── openai_tools.py
 │   └── mcp_server.py
 ├── assistant/
 │   └── agent.py
 ├── evals/
 │   ├── golden.json
+│   ├── scoring.py
 │   └── run_evals.py
 ├── data/
 │   ├── sample_transactions_bank.csv

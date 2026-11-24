@@ -10,19 +10,22 @@ from __future__ import annotations
 import json
 import os
 import sys
-from pathlib import Path
 from typing import Any
+
+from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
+from project_paths import ENV_FILE
 from tools.openai_tools import TOOL_DEFINITIONS, execute_tool, get_tool_call_log
 
-load_dotenv(ROOT / ".env")
+load_dotenv(ENV_FILE)
+
 
 SYSTEM_PROMPT = """You are a governed financial assistant in a home-lab prototype.
 
@@ -42,6 +45,33 @@ CRITICAL RULES:
 
 Be concise, precise, and transparent about lineage and inputs used.
 """
+
+
+def _assistant_message_dict(message: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "role": "assistant",
+        "content": message.content,
+    }
+    if message.tool_calls:
+        payload["tool_calls"] = [
+            {
+                "id": tc.id,
+                "type": "function",
+                "function": {
+                    "name": tc.function.name,
+                    "arguments": tc.function.arguments,
+                },
+            }
+            for tc in message.tool_calls
+        ]
+    return payload
+
+
+def _parse_tool_arguments(raw: str | None) -> dict[str, Any]:
+    try:
+        return json.loads(raw or "{}")
+    except json.JSONDecodeError:
+        return {}
 
 
 class FinanceAssistant:
@@ -66,45 +96,40 @@ class FinanceAssistant:
         self.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         self.last_tool_calls = []
 
+    def _complete(self, *, tool_choice: str = "auto") -> Any:
+        return self.client.chat.completions.create(
+            model=self.model,
+            messages=self.messages,
+            tools=TOOL_DEFINITIONS,
+            tool_choice=tool_choice,
+        )
+
+    def _dispatch_tool_calls(self, message: Any) -> None:
+        for tool_call in message.tool_calls:
+            name = tool_call.function.name
+            args = _parse_tool_arguments(tool_call.function.arguments)
+            result = execute_tool(name, args)
+            self.last_tool_calls.append(
+                {"name": name, "arguments": args, "result": result}
+            )
+            self.messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result, default=str),
+                }
+            )
+
     def ask(self, user_message: str) -> dict[str, Any]:
         """
         Send a user message and return the assistant reply plus tool-call metadata.
-
-        Returns:
-            {
-              "reply": str,
-              "tool_calls": [{"name", "arguments", "result"}, ...],
-              "messages": full conversation (optional inspection)
-            }
         """
         self.messages.append({"role": "user", "content": user_message})
         self.last_tool_calls = []
 
         for _ in range(self.max_tool_rounds):
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=self.messages,
-                tools=TOOL_DEFINITIONS,
-                tool_choice="auto",
-            )
-            message = response.choices[0].message
-            assistant_msg: dict[str, Any] = {
-                "role": "assistant",
-                "content": message.content,
-            }
-            if message.tool_calls:
-                assistant_msg["tool_calls"] = [
-                    {
-                        "id": tc.id,
-                        "type": "function",
-                        "function": {
-                            "name": tc.function.name,
-                            "arguments": tc.function.arguments,
-                        },
-                    }
-                    for tc in message.tool_calls
-                ]
-            self.messages.append(assistant_msg)
+            message = self._complete(tool_choice="auto").choices[0].message
+            self.messages.append(_assistant_message_dict(message))
 
             if not message.tool_calls:
                 return {
@@ -113,32 +138,10 @@ class FinanceAssistant:
                     "tool_log": get_tool_call_log(),
                 }
 
-            for tool_call in message.tool_calls:
-                name = tool_call.function.name
-                try:
-                    args = json.loads(tool_call.function.arguments or "{}")
-                except json.JSONDecodeError:
-                    args = {}
-                result = execute_tool(name, args)
-                self.last_tool_calls.append(
-                    {"name": name, "arguments": args, "result": result}
-                )
-                self.messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "content": json.dumps(result, default=str),
-                    }
-                )
+            self._dispatch_tool_calls(message)
 
         # Safety: too many tool rounds — ask model to wrap up without new tools.
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=self.messages,
-            tools=TOOL_DEFINITIONS,
-            tool_choice="none",
-        )
-        final = response.choices[0].message.content or ""
+        final = self._complete(tool_choice="none").choices[0].message.content or ""
         self.messages.append({"role": "assistant", "content": final})
         return {
             "reply": final,

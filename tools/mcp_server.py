@@ -2,8 +2,7 @@
 Optional FastMCP server exposing the same governed finance workflows.
 
 Run:
-    python -m tools.mcp_server
-    # or:  fastmcp run tools/mcp_server.py
+    python3 -m tools.mcp_server
 """
 
 from __future__ import annotations
@@ -12,15 +11,16 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 from tools.openai_tools import execute_tool
 
+
 try:
     from mcp.server.fastmcp import FastMCP
-except ImportError:  # pragma: no cover - fallback import path used by some installs
+except ImportError:  # pragma: no cover
     from fastmcp import FastMCP
 
 mcp = FastMCP(

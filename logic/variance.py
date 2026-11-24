@@ -8,9 +8,10 @@ threshold. Pure function — no LLM math.
 from __future__ import annotations
 
 import csv
-from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Union
+
+from .common import find_column, make_lineage, parse_amount, round_money
 
 WORKFLOW_NAME = "analyze_variance"
 WORKFLOW_VERSION = "1.0.0"
@@ -18,21 +19,8 @@ WORKFLOW_VERSION = "1.0.0"
 AmountMap = Mapping[str, Any]
 SourceInput = Union[AmountMap, str, Path]
 
-
-@dataclass(frozen=True)
-class Lineage:
-    workflow: str
-    version: str
-    inputs_used: dict[str, Any]
-
-
-def _to_float(value: Any) -> float:
-    if isinstance(value, (int, float)):
-        return float(value)
-    text = str(value).strip().replace(",", "").replace("$", "")
-    if text == "":
-        return 0.0
-    return float(text)
+_ACCOUNT_KEYS = ("account", "Account", "category", "Category", "name", "Name")
+_AMOUNT_KEYS = ("amount", "Amount", "actual", "Actual", "budget", "Budget", "value")
 
 
 def _load_amount_map(source: SourceInput) -> dict[str, float]:
@@ -44,32 +32,17 @@ def _load_amount_map(source: SourceInput) -> dict[str, float]:
       - CSV path with columns account/category + amount (or actual/budget)
     """
     if isinstance(source, Mapping):
-        return {str(k): _to_float(v) for k, v in source.items()}
+        return {str(k): parse_amount(v, empty_as_zero=True) for k, v in source.items()}
 
     path = Path(source)
     with path.open(newline="", encoding="utf-8") as handle:
-        reader = csv.DictReader(handle)
-        rows = list(reader)
+        rows = list(csv.DictReader(handle))
 
     if not rows:
         return {}
 
-    account_key = next(
-        (
-            k
-            for k in ("account", "Account", "category", "Category", "name", "Name")
-            if k in rows[0]
-        ),
-        None,
-    )
-    amount_key = next(
-        (
-            k
-            for k in ("amount", "Amount", "actual", "Actual", "budget", "Budget", "value")
-            if k in rows[0]
-        ),
-        None,
-    )
+    account_key = find_column(rows[0], _ACCOUNT_KEYS)
+    amount_key = find_column(rows[0], _AMOUNT_KEYS)
     if account_key is None or amount_key is None:
         raise ValueError(
             "CSV must include an account/category column and an amount column "
@@ -81,8 +54,18 @@ def _load_amount_map(source: SourceInput) -> dict[str, float]:
         account = str(row[account_key]).strip()
         if not account:
             continue
-        result[account] = result.get(account, 0.0) + _to_float(row[amount_key])
+        result[account] = result.get(account, 0.0) + parse_amount(
+            row[amount_key], empty_as_zero=True
+        )
     return result
+
+
+def _percent_variance(actual: float, budget_amt: float) -> float | None:
+    if budget_amt == 0:
+        if actual == 0:
+            return None
+        return 100.0 if actual > 0 else -100.0
+    return round((actual - budget_amt) / budget_amt * 100.0, 4)
 
 
 def analyze_variance(
@@ -108,13 +91,10 @@ def analyze_variance(
     total_budget = 0.0
 
     for account in accounts:
-        actual = round(actual_map.get(account, 0.0), 6)
-        budget_amt = round(budget_map.get(account, 0.0), 6)
-        abs_var = round(actual - budget_amt, 6)
-        if budget_amt == 0:
-            pct_var = None if actual == 0 else (100.0 if actual > 0 else -100.0)
-        else:
-            pct_var = round((abs_var / budget_amt) * 100.0, 4)
+        actual = round_money(actual_map.get(account, 0.0))
+        budget_amt = round_money(budget_map.get(account, 0.0))
+        abs_var = round_money(actual - budget_amt)
+        pct_var = _percent_variance(actual, budget_amt)
 
         is_flagged = False
         if pct_var is not None and abs(pct_var) >= threshold_pct:
@@ -137,28 +117,8 @@ def analyze_variance(
         total_actual += actual
         total_budget += budget_amt
 
-    total_abs = round(total_actual - total_budget, 6)
-    total_pct = (
-        None
-        if total_budget == 0
-        else round((total_abs / total_budget) * 100.0, 4)
-    )
-
-    lineage = Lineage(
-        workflow=WORKFLOW_NAME,
-        version=WORKFLOW_VERSION,
-        inputs_used={
-            "account_count": len(accounts),
-            "threshold_pct": threshold_pct,
-            "threshold_abs": threshold_abs,
-            "actuals_source": (
-                str(actuals) if isinstance(actuals, (str, Path)) else f"inline[{len(actual_map)}]"
-            ),
-            "budget_source": (
-                str(budget) if isinstance(budget, (str, Path)) else f"inline[{len(budget_map)}]"
-            ),
-        },
-    )
+    total_abs = round_money(total_actual - total_budget)
+    total_pct = None if total_budget == 0 else round(total_abs / total_budget * 100.0, 4)
 
     return {
         "item_count": len(items),
@@ -166,10 +126,28 @@ def analyze_variance(
         "items": items,
         "flagged": flagged,
         "totals": {
-            "actual": round(total_actual, 6),
-            "budget": round(total_budget, 6),
+            "actual": round_money(total_actual),
+            "budget": round_money(total_budget),
             "absolute_variance": total_abs,
             "percent_variance": total_pct,
         },
-        "lineage": asdict(lineage),
+        "lineage": make_lineage(
+            WORKFLOW_NAME,
+            WORKFLOW_VERSION,
+            {
+                "account_count": len(accounts),
+                "threshold_pct": threshold_pct,
+                "threshold_abs": threshold_abs,
+                "actuals_source": (
+                    str(actuals)
+                    if isinstance(actuals, (str, Path))
+                    else f"inline[{len(actual_map)}]"
+                ),
+                "budget_source": (
+                    str(budget)
+                    if isinstance(budget, (str, Path))
+                    else f"inline[{len(budget_map)}]"
+                ),
+            },
+        ),
     }
