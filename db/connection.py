@@ -1,9 +1,10 @@
-"""SQLite (default) or Postgres via DATABASE_URL — one access path."""
+"""SQLite (default) or Postgres via DATABASE_URL — pooled for performance."""
 
 from __future__ import annotations
 
 import os
 import sqlite3
+import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator, Protocol
@@ -12,6 +13,9 @@ from project_paths import ROOT
 
 DEFAULT_SQLITE = ROOT / "data" / "governed_finance.db"
 MIGRATIONS_DIR = ROOT / "migrations"
+
+_sqlite_local = threading.local()
+_sqlite_write_lock = threading.Lock()
 
 
 class DbConnection(Protocol):
@@ -37,9 +41,21 @@ def _sqlite_path() -> Path:
 
 
 def _connect_sqlite() -> sqlite3.Connection:
-    conn = sqlite3.connect(_sqlite_path(), check_same_thread=False)
+    conn = sqlite3.connect(_sqlite_path(), check_same_thread=False, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
+    conn.execute("PRAGMA temp_store = MEMORY")
+    return conn
+
+
+def _thread_sqlite() -> sqlite3.Connection:
+    """Reuse one SQLite connection per thread (avoids connect/close per request)."""
+    conn = getattr(_sqlite_local, "conn", None)
+    if conn is None:
+        conn = _connect_sqlite()
+        _sqlite_local.conn = conn
     return conn
 
 
@@ -53,36 +69,57 @@ def _connect_postgres():
             "pip install 'psycopg[binary]'"
         ) from exc
 
-    conn = psycopg.connect(_database_url(), row_factory=dict_row)
-    return conn
+    return psycopg.connect(_database_url(), row_factory=dict_row)
 
 
 def connect() -> Any:
     if _database_url().startswith(("postgres://", "postgresql://")):
         return _connect_postgres()
-    return _connect_sqlite()
+    return _thread_sqlite()
+
+
+def _is_postgres() -> bool:
+    return _database_url().startswith(("postgres://", "postgresql://"))
 
 
 @contextmanager
 def get_connection() -> Iterator[Any]:
-    conn = connect()
-    try:
-        yield conn
-        conn.commit()
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
-
-
-def _adapt_sql(sql: str) -> str:
-    """Migrations use `?` placeholders conceptually; Postgres needs `%s` at runtime.
-    Schema DDL is written to work on both engines.
     """
-    if _database_url().startswith(("postgres://", "postgresql://")):
-        return sql  # DDL only in migrations; runtime SQL adapted in repository
-    return sql
+    Yield a DB connection.
+
+    SQLite: thread-local reuse + write lock (no per-call open/close).
+    Postgres: short-lived connection (swap for a real pool in larger deploys).
+    """
+    if _is_postgres():
+        conn = _connect_postgres()
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+        return
+
+    conn = _thread_sqlite()
+    with _sqlite_write_lock:
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+
+def reset_sqlite_pool() -> None:
+    """Close thread-local SQLite connection (used by tests when SQLITE_PATH changes)."""
+    conn = getattr(_sqlite_local, "conn", None)
+    if conn is not None:
+        try:
+            conn.close()
+        finally:
+            _sqlite_local.conn = None
 
 
 def init_db() -> None:
@@ -94,7 +131,6 @@ def init_db() -> None:
             if hasattr(conn, "executescript"):
                 conn.executescript(sql)
             else:
-                # psycopg: run statements split on semicolons carefully enough for our DDL
                 for statement in sql.split(";"):
                     stmt = statement.strip()
                     if stmt:

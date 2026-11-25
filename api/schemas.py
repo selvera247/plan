@@ -24,6 +24,10 @@ class ReconcileRequest(BaseModel):
     amount_tolerance: float = 0.01
     left_label: str = "bank"
     right_label: str = "ledger"
+    include_details: bool = Field(
+        True,
+        description="If false, return counts/totals only (faster, less memory).",
+    )
     conversation_id: Optional[str] = None
 
 
@@ -32,6 +36,10 @@ class VarianceRequest(BaseModel):
     budget_source: str = Field(..., examples=["sample_budget"])
     threshold_pct: float = 5.0
     threshold_abs: Optional[float] = None
+    include_details: bool = Field(
+        True,
+        description="If false, omit per-account arrays (faster serialization).",
+    )
     conversation_id: Optional[str] = None
 
 

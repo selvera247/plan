@@ -94,10 +94,22 @@ tool_calls(
 ### Caching strategy
 
 - **Key:** `sha256(workflow|version|canonical_json(inputs))`
-- **Value:** full workflow result JSON (includes lineage)
+- **Value:** workflow result (treat as immutable; no deepcopy/JSON copy on hit)
 - **TTL:** configurable (default 15 min); invalidate on workflow version bump
 - **MVP:** process-local LRU; **Prod:** Redis with the same key format
+- Prefer `include_details=false` for large batch jobs (counts/totals only)
+- Audit DB stores **compact** summaries (counts/totals/lineage), not full row arrays
 - Never cache chat narrative text — only deterministic workflow outputs
+
+### Performance notes
+
+| Hot path | Strategy |
+|----------|----------|
+| Amount matching | Quantize on parse; float compare with epsilon (no Decimal per compare) |
+| CSV ingest | Normalize headers once; resolve columns once per file |
+| Large responses | `include_details=false` skips matched/item arrays |
+| Cache hits | Immutable references (O(1)); hit rate exposed on `/ready` |
+| SQLite | Thread-local connections, WAL, `synchronous=NORMAL` |
 
 ### Minimal production version (this repo)
 

@@ -98,6 +98,7 @@ def reconcile(
             amount_tolerance=body.amount_tolerance,
             left_label=body.left_label,
             right_label=body.right_label,
+            include_details=body.include_details,
             conversation_id=body.conversation_id,
         )
     except (ValueError, FileNotFoundError) as exc:
@@ -121,6 +122,7 @@ def variance(
             budget_source=body.budget_source,
             threshold_pct=body.threshold_pct,
             threshold_abs=body.threshold_abs,
+            include_details=body.include_details,
             conversation_id=body.conversation_id,
         )
     except (ValueError, FileNotFoundError) as exc:

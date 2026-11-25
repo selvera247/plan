@@ -7,9 +7,11 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Optional, Union
+from typing import Any, Iterable, Mapping, Optional, Sequence, Union
 
 MONEY_QUANTUM = Decimal("0.000001")
+# Float compare epsilon after values have been quantized via parse_amount/as_decimal.
+_FLOAT_EPS = 1e-12
 
 
 @dataclass(frozen=True)
@@ -34,7 +36,6 @@ def _clean_amount_text(value: Any) -> tuple[str, bool]:
 
     negative = False
     if text.startswith("(") and text.endswith(")"):
-        # Accounting notation: (1,250.00) => -1250.00
         negative = True
         text = text[1:-1].strip()
     if text.startswith("+"):
@@ -50,7 +51,8 @@ def parse_amount(value: Any, *, empty_as_zero: bool = False) -> float:
     Parse a currency-like value to float.
 
     Accepts ints/floats, `$1,250.00`, `(1250.00)` accounting negatives, and blanks
-    when ``empty_as_zero`` is true.
+    when ``empty_as_zero`` is true. Numeric inputs are quantized so later float
+    comparisons are stable.
     """
     if isinstance(value, bool):
         raise ValueError(f"Invalid amount value: {value!r}")
@@ -87,7 +89,13 @@ def as_decimal(value: Any) -> Decimal:
 
 
 def amounts_within_tolerance(a: float, b: float, tolerance: float) -> bool:
-    return abs(as_decimal(a) - as_decimal(b)) <= as_decimal(tolerance)
+    """
+    Fast float compare.
+
+    Safe for values produced by ``parse_amount`` (already quantized). Uses a tiny
+    epsilon so binary float noise does not break exact matches at tol=0.
+    """
+    return abs(a - b) <= tolerance + _FLOAT_EPS
 
 
 def parse_date(value: Any) -> date:
@@ -115,19 +123,38 @@ def normalize_row(row: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def find_column(row: Mapping[str, Any], candidates: Iterable[str]) -> Optional[str]:
-    """Return the actual key in ``row`` matching one of ``candidates`` (BOM-/case-tolerant)."""
-    normalized = normalize_row(row)
-    # Map normalized header -> original key (best-effort).
-    original_by_norm = {normalize_header(k): k for k in row.keys()}
+    """Return the key in ``row`` matching one of ``candidates`` (BOM-/case-tolerant)."""
+    # Fast path: exact candidate hit without building maps.
+    for key in candidates:
+        if key in row:
+            return key
+
+    normalized = normalize_row(row) if any("\ufeff" in str(k) or str(k) != str(k).strip() for k in row) else row
     for key in candidates:
         if key in normalized:
-            return original_by_norm.get(key, key)
+            return key
     lower_map = {str(k).lower(): k for k in normalized}
     for key in candidates:
         found = lower_map.get(key.lower())
         if found is not None:
-            return original_by_norm.get(found, found)
+            return found
     return None
+
+
+def resolve_columns(
+    row: Mapping[str, Any], groups: Mapping[str, Sequence[str]]
+) -> dict[str, str]:
+    """Resolve each logical field once (e.g. for a whole CSV) instead of per row."""
+    resolved: dict[str, str] = {}
+    for name, candidates in groups.items():
+        found = find_column(row, candidates)
+        if found is None:
+            raise ValueError(
+                f"Missing required column for '{name}' "
+                f"(tried {list(candidates)}; found {list(row.keys())})"
+            )
+        resolved[name] = found
+    return resolved
 
 
 def read_csv_rows(path: Union[str, Path]) -> list[dict[str, Any]]:
@@ -135,12 +162,19 @@ def read_csv_rows(path: Union[str, Path]) -> list[dict[str, Any]]:
     file_path = Path(path)
     with file_path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
+        # Normalize headers once via fieldnames, then build rows without per-cell rework
+        if reader.fieldnames:
+            field_map = {name: normalize_header(name) for name in reader.fieldnames}
+            rows: list[dict[str, Any]] = []
+            for raw in reader:
+                rows.append({field_map[k]: v for k, v in raw.items() if k is not None})
+            return rows
         return [normalize_row(row) for row in reader]
 
 
 def round_money(value: float, digits: int = 6) -> float:
-    quantum = Decimal("1").scaleb(-digits)
-    return float(as_decimal(value).quantize(quantum, rounding=ROUND_HALF_UP))
+    # Fast path: values from parse_amount are already quantized.
+    return round(float(value), digits)
 
 
 def require_non_negative(name: str, value: float) -> float:

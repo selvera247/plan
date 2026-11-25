@@ -7,67 +7,69 @@ with a configurable amount tolerance. Pure function — no LLM math.
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any, Mapping, Sequence, Union
 
 from .common import (
     amounts_within_tolerance,
-    find_column,
     make_lineage,
-    normalize_row,
     parse_amount,
     parse_date,
     read_csv_rows,
     require_non_negative,
+    resolve_columns,
     round_money,
 )
 
 WORKFLOW_NAME = "reconcile_transactions"
-WORKFLOW_VERSION = "1.0.1"
+WORKFLOW_VERSION = "1.0.2"
 
 TransactionLike = Mapping[str, Any]
 SourceInput = Union[Sequence[TransactionLike], str, Path]
 
-_AMOUNT_KEYS = ("amount", "Amount", "amt", "value")
-_DATE_KEYS = ("date", "Date", "txn_date", "transaction_date")
-_REF_KEYS = ("reference", "Reference", "ref", "check_number", "id")
+_COLUMN_GROUPS = {
+    "amount": ("amount", "Amount", "amt", "value"),
+    "date": ("date", "Date", "txn_date", "transaction_date"),
+    "reference": ("reference", "Reference", "ref", "check_number", "id"),
+}
 
 
-def _normalize_transaction(raw: Mapping[str, Any], *, source: str, index: int) -> dict[str, Any]:
-    original = dict(raw)
-    row = normalize_row(raw)
-    amount_key = find_column(row, _AMOUNT_KEYS)
-    date_key = find_column(row, _DATE_KEYS)
-    ref_key = find_column(row, _REF_KEYS)
-    if amount_key is None or date_key is None or ref_key is None:
-        raise ValueError(
-            "Transaction missing required fields (amount/date/reference): "
-            f"{original}"
-        )
+def _normalize_transaction(
+    row: Mapping[str, Any],
+    *,
+    source: str,
+    index: int,
+    cols: Mapping[str, str],
+) -> dict[str, Any]:
     return {
         "source": source,
         "index": index,
-        "amount": parse_amount(row[amount_key]),
-        "date": parse_date(row[date_key]).isoformat(),
-        "reference": str(row[ref_key]).strip().upper(),
+        "amount": parse_amount(row[cols["amount"]]),
+        "date": parse_date(row[cols["date"]]).isoformat(),
+        "reference": str(row[cols["reference"]]).strip().upper(),
         "description": str(row.get("description") or row.get("Description") or ""),
-        "raw": original,
     }
 
 
 def _load_transactions(source: SourceInput, *, label: str) -> list[dict[str, Any]]:
     if isinstance(source, (str, Path)):
         rows = read_csv_rows(source)
-        return [_normalize_transaction(row, source=label, index=i) for i, row in enumerate(rows)]
+    else:
+        rows = list(source)
 
+    if not rows:
+        return []
+
+    cols = resolve_columns(rows[0], _COLUMN_GROUPS)
     return [
-        _normalize_transaction(row, source=label, index=i) for i, row in enumerate(source)
+        _normalize_transaction(row, source=label, index=i, cols=cols)
+        for i, row in enumerate(rows)
     ]
 
 
 def _match_key(txn: Mapping[str, Any]) -> tuple[str, str]:
-    return (str(txn["date"]), str(txn["reference"]))
+    return (txn["date"], txn["reference"])
 
 
 def reconcile_transactions(
@@ -77,6 +79,7 @@ def reconcile_transactions(
     amount_tolerance: float = 0.01,
     left_label: str = "bank",
     right_label: str = "ledger",
+    include_details: bool = True,
 ) -> dict[str, Any]:
     """
     Reconcile two transaction sets.
@@ -86,66 +89,85 @@ def reconcile_transactions(
       - same reference (case-insensitive)
       - amounts within ``amount_tolerance``
 
-    Returns a structured summary including lineage metadata.
+    Set ``include_details=False`` to return counts/totals/lineage only (lower
+    memory and faster JSON serialization for large datasets).
     """
     amount_tolerance = require_non_negative("amount_tolerance", float(amount_tolerance))
 
     left_txns = _load_transactions(left, label=left_label)
     right_txns = _load_transactions(right, label=right_label)
 
-    # Index right-side rows by (date, reference) for O(n+m) matching while
-    # preserving original first-available semantics via ascending indices.
-    buckets: dict[tuple[str, str], list[int]] = defaultdict(list)
+    # deque per key so matched right rows are O(1) to consume.
+    buckets: dict[tuple[str, str], deque[int]] = defaultdict(deque)
     for i, txn in enumerate(right_txns):
         buckets[_match_key(txn)].append(i)
 
-    used = [False] * len(right_txns)
     matched: list[dict[str, Any]] = []
     unmatched_left: list[dict[str, Any]] = []
+    matched_left_total = 0.0
+    matched_right_total = 0.0
+    unmatched_left_total = 0.0
 
     for left_txn in left_txns:
+        bucket = buckets.get(_match_key(left_txn))
         match_idx = None
-        for i in buckets.get(_match_key(left_txn), []):
-            if used[i]:
-                continue
-            if amounts_within_tolerance(
-                left_txn["amount"], right_txns[i]["amount"], amount_tolerance
-            ):
-                match_idx = i
-                break
+        if bucket:
+            # Scan without removing until amount matches; rotate non-matches back.
+            n = len(bucket)
+            for _ in range(n):
+                i = bucket.popleft()
+                if amounts_within_tolerance(
+                    left_txn["amount"], right_txns[i]["amount"], amount_tolerance
+                ):
+                    match_idx = i
+                    break
+                bucket.append(i)
 
         if match_idx is None:
             unmatched_left.append(left_txn)
+            unmatched_left_total += left_txn["amount"]
             continue
 
-        used[match_idx] = True
         right_txn = right_txns[match_idx]
-        matched.append(
-            {
-                "left": left_txn,
-                "right": right_txn,
-                "amount_variance": round_money(left_txn["amount"] - right_txn["amount"]),
-            }
-        )
+        matched_left_total += left_txn["amount"]
+        matched_right_total += right_txn["amount"]
+        if include_details:
+            matched.append(
+                {
+                    "left": left_txn,
+                    "right": right_txn,
+                    "amount_variance": round_money(
+                        left_txn["amount"] - right_txn["amount"]
+                    ),
+                }
+            )
 
-    unmatched_right = [txn for i, txn in enumerate(right_txns) if not used[i]]
+    unmatched_right: list[dict[str, Any]] = []
+    unmatched_right_total = 0.0
+    unmatched_right_count = 0
+    for bucket in buckets.values():
+        for i in bucket:
+            txn = right_txns[i]
+            unmatched_right_count += 1
+            unmatched_right_total += txn["amount"]
+            if include_details:
+                unmatched_right.append(txn)
 
-    matched_left_total = sum(m["left"]["amount"] for m in matched)
-    matched_right_total = sum(m["right"]["amount"] for m in matched)
-    unmatched_left_total = sum(t["amount"] for t in unmatched_left)
-    unmatched_right_total = sum(t["amount"] for t in unmatched_right)
+    # Preserve original right-side order for unmatched details.
+    if include_details and unmatched_right:
+        unmatched_right.sort(key=lambda t: t["index"])
+
     total_variance = round_money(
         (matched_left_total + unmatched_left_total)
         - (matched_right_total + unmatched_right_total)
     )
 
-    return {
-        "matched_count": len(matched),
+    matched_count = len(left_txns) - len(unmatched_left)
+
+    result: dict[str, Any] = {
+        "matched_count": matched_count,
         "unmatched_left_count": len(unmatched_left),
-        "unmatched_right_count": len(unmatched_right),
-        "matched": matched,
-        "unmatched_left": unmatched_left,
-        "unmatched_right": unmatched_right,
+        "unmatched_right_count": unmatched_right_count,
         "totals": {
             "matched_left": round_money(matched_left_total),
             "matched_right": round_money(matched_right_total),
@@ -162,6 +184,7 @@ def reconcile_transactions(
                 "left_count": len(left_txns),
                 "right_count": len(right_txns),
                 "amount_tolerance": amount_tolerance,
+                "include_details": include_details,
                 "left_source": (
                     str(left) if isinstance(left, (str, Path)) else f"inline[{len(left_txns)}]"
                 ),
@@ -171,3 +194,8 @@ def reconcile_transactions(
             },
         ),
     }
+    if include_details:
+        result["matched"] = matched
+        result["unmatched_left"] = unmatched_left
+        result["unmatched_right"] = unmatched_right
+    return result
