@@ -2,7 +2,7 @@
 
 A **governed** finance assistant: an OpenAI model answers finance questions by calling **deterministic Python workflows**, never by inventing numbers. Every answer carries **lineage** (workflow name, version, inputs) and can be audited via durable workflow runs.
 
-Design docs: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/CLEAN_ARCHITECTURE.md`](docs/CLEAN_ARCHITECTURE.md).
+Design docs: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/CLEAN_ARCHITECTURE.md`](docs/CLEAN_ARCHITECTURE.md) · [`docs/MULTI_AGENT.md`](docs/MULTI_AGENT.md).
 
 ## Architecture (clean layers)
 
@@ -19,7 +19,7 @@ infrastructure/ (persistence · cache · llm · tools)
 | Layer | Role |
 |-------|------|
 | `domain/` | Pure governed workflows (no frameworks) |
-| `application/` | Use cases: WorkflowService, GovernedChatService, ports |
+| `application/` | Use cases + multi-agent pipeline (Router→Optimizer→Specialist→Reviewer) |
 | `infrastructure/` | DB, cache, OpenAI, tool registry, paths |
 | `interfaces/` | FastAPI, CLI, MCP adapters |
 | `migrations/` · `data/` · `evals/` · `tests/` | Schema, samples, golden evals, regression |
@@ -56,7 +56,13 @@ curl -s -X POST http://127.0.0.1:8000/v1/workflows/reconcile \
 curl -s -X POST http://127.0.0.1:8000/v1/workflows/variance \
   -H 'Content-Type: application/json' \
   -d '{"actuals_source":"sample_actuals","budget_source":"sample_budget"}'
+
+# Multi-agent pipeline (no OpenAI key required)
+curl -s -X POST http://127.0.0.1:8000/v1/agents/run \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"Reconcile sample bank and ledger. How many matched?"}'
 ```
+
 
 With auth enabled (`GOVERNED_API_KEY`), send `X-API-Key`.
 

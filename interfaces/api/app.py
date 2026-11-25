@@ -24,13 +24,21 @@ from infrastructure.config.paths import ENV_FILE
 
 load_dotenv(ENV_FILE)
 
+from application.agents.orchestrator import AgentOrchestrator
 from application.chat_service import GovernedChatService
 from application.workflow_service import WorkflowService
 from infrastructure.cache.result_cache import get_result_cache
 from infrastructure.persistence.connection import _database_url, get_connection, init_db
 from infrastructure.persistence.repository import AuditRepository
-from interfaces.api.deps import get_chat_service, get_workflow_service, require_api_key
+from interfaces.api.deps import (
+    get_chat_service,
+    get_orchestrator,
+    get_workflow_service,
+    require_api_key,
+)
 from interfaces.api.schemas import (
+    AgentRunRequest,
+    AgentRunResponse,
     ChatRequest,
     ChatResponse,
     ConversationResponse,
@@ -195,3 +203,17 @@ def list_runs(
         repo = AuditRepository(conn, driver=driver)
         runs = repo.list_runs(limit=limit)
     return {"runs": runs, "count": len(runs)}
+
+
+@app.post("/v1/agents/run", response_model=AgentRunResponse, tags=["agents"])
+def run_agents(
+    body: AgentRunRequest,
+    _: str | None = Depends(require_api_key),
+    orchestrator: AgentOrchestrator = Depends(get_orchestrator),
+) -> AgentRunResponse:
+    """
+    Multi-agent pipeline: Router → Optimizer → Specialist → Reviewer → Narrator.
+    Offline-capable (no OpenAI key required for routing/narration).
+    """
+    result = orchestrator.run(body.question, conversation_id=body.conversation_id)
+    return AgentRunResponse(**result.to_dict())

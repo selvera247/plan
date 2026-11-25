@@ -7,11 +7,13 @@ from typing import Annotated, Optional
 
 from fastapi import Header, HTTPException, status
 
+from application.agents.orchestrator import AgentOrchestrator
 from application.chat_service import GovernedChatService
 from application.workflow_service import WorkflowService
 
 _workflow_service: WorkflowService | None = None
 _chat_service: GovernedChatService | None = None
+_orchestrator: AgentOrchestrator | None = None
 
 
 def get_workflow_service() -> WorkflowService:
@@ -26,6 +28,13 @@ def get_chat_service() -> GovernedChatService:
     if _chat_service is None:
         _chat_service = GovernedChatService(get_workflow_service())
     return _chat_service
+
+
+def get_orchestrator() -> AgentOrchestrator:
+    global _orchestrator
+    if _orchestrator is None:
+        _orchestrator = AgentOrchestrator(get_workflow_service())
+    return _orchestrator
 
 
 def require_api_key(
