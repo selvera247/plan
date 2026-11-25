@@ -1,35 +1,32 @@
-# Governed Financial Assistant (Home-Lab Prototype)
+# Governed Financial Assistant
 
-A minimal, realistic prototype of a **governed finance assistant**: an OpenAI model answers finance questions by calling **deterministic Python workflows**, never by inventing numbers. Every tool response includes **lineage** (workflow name, version, inputs used) so answers are auditable.
+A **governed** finance assistant: an OpenAI model answers finance questions by calling **deterministic Python workflows**, never by inventing numbers. Every answer carries **lineage** (workflow name, version, inputs) and can be audited via durable workflow runs.
 
-This simulates a “data/logic → AI” pattern (similar in spirit to governed Alteryx/analytic workflows + an LLM front-end), implemented in pure Python.
+Full scalable design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## Architecture
+## Architecture (minimal production)
 
 ```
-User question
-    ↓
-OpenAI assistant (assistant/agent.py — Chat Completions + function calling)
-    ↓  must call tools for any numeric / rule-based ask
-Tool facade (tools/openai_tools.py)
-    ├── registry (schemas, aliases, handlers)
-    ├── audit log (logs/tool_calls.log)
-    └── FastMCP exposure (tools/mcp_server.py)
-    ↓
-Deterministic logic (logic/reconcile.py, logic/variance.py)
-    └── shared helpers (logic/common.py — lineage, parsing)
-    ↓
-Structured result + lineage
+Clients (HTTP / CLI / MCP)
+        ↓
+FastAPI (api/app.py)  — X-API-Key, /health, /ready
+        ↓
+services/  WorkflowService · GovernedChatService
+        ↓
+cache/ (LRU TTL)  →  logic/* (deterministic)  →  db/ (SQLite or Postgres)
+        ↓
+workflow_runs + tool_calls + conversations (migrations/001_init.sql)
 ```
 
 | Layer | Role |
 |-------|------|
-| `logic/` | Pure workflows + shared `common` helpers (lineage, parsing) |
-| `tools/` | Registry, audit, OpenAI facade, optional FastMCP server |
-| `assistant/` | System-prompted agent that refuses to do finance math itself |
-| `evals/` | Golden questions (`tool_args` + expectations) + scoring module |
-| `project_paths.py` | Repo root / data / log path constants |
-| `data/` | Small realistic sample CSVs |
+| `api/` | Production HTTP API (workflows, chat, audit) |
+| `services/` | Orchestration: cache, persistence, chat tool routing |
+| `db/` + `migrations/` | Conversations, messages, workflow runs, tool calls |
+| `cache/` | Deterministic result memoization (LRU → Redis-ready) |
+| `logic/` | Pure workflows + shared helpers |
+| `tools/` / `assistant/` | Tool registry, MCP, CLI agent |
+| `evals/` / `tests/` | Golden evals + regression / API smoke tests |
 
 ## Setup
 
@@ -38,10 +35,31 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-cp .env.example .env        # then set OPENAI_API_KEY
+cp .env.example .env        # set OPENAI_API_KEY; optional GOVERNED_API_KEY / DATABASE_URL
 ```
 
-Requires a single `OPENAI_API_KEY`. Optional: `OPENAI_MODEL` (default `gpt-4o-mini`).
+Requires `OPENAI_API_KEY` for chat. Workflow HTTP endpoints run without it. Optional: `OPENAI_MODEL` (default `gpt-4o-mini`), `GOVERNED_API_KEY`, `DATABASE_URL` (Postgres) or SQLite default.
+
+## Production API
+
+```bash
+uvicorn api.app:app --reload --port 8000
+# Docs: http://127.0.0.1:8000/docs
+```
+
+Examples:
+
+```bash
+curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:8000/v1/workflows/reconcile \
+  -H 'Content-Type: application/json' \
+  -d '{"left_source":"sample_bank","right_source":"sample_ledger"}'
+curl -s -X POST http://127.0.0.1:8000/v1/workflows/variance \
+  -H 'Content-Type: application/json' \
+  -d '{"actuals_source":"sample_actuals","budget_source":"sample_budget"}'
+```
+
+With auth enabled (`GOVERNED_API_KEY`), send `X-API-Key`.
 
 ## Workflows
 
@@ -135,29 +153,15 @@ Results are written to `logs/eval_results.json`.
 
 ```
 /
-├── project_paths.py
-├── logic/
-│   ├── common.py
-│   ├── reconcile.py
-│   ├── variance.py
-│   └── __init__.py
-├── tools/
-│   ├── registry.py
-│   ├── audit.py
-│   ├── openai_tools.py
-│   └── mcp_server.py
-├── assistant/
-│   └── agent.py
-├── evals/
-│   ├── golden.json
-│   ├── scoring.py
-│   └── run_evals.py
-├── data/
-│   ├── sample_transactions_bank.csv
-│   ├── sample_transactions_ledger.csv
-│   ├── sample_actuals.csv
-│   └── sample_budget.csv
-├── logs/                 # created at runtime
+├── docs/ARCHITECTURE.md
+├── api/                 # FastAPI app + schemas
+├── services/            # WorkflowService, GovernedChatService
+├── db/ + migrations/    # SQLite/Postgres persistence
+├── cache/               # LRU result cache (Redis-ready keys)
+├── logic/               # deterministic workflows
+├── tools/ + assistant/
+├── evals/ + tests/
+├── data/                # sample CSVs (+ local SQLite db at runtime)
 ├── README.md
 ├── requirements.txt
 └── .env.example
@@ -166,7 +170,7 @@ Results are written to `logs/eval_results.json`.
 ## Tests
 
 ```bash
-python3 -m unittest tests.test_edge_cases -v
+python3 -m unittest tests.test_edge_cases tests.test_api_and_cache -v
 python3 evals/run_evals.py --logic-only
 ```
 
