@@ -72,3 +72,19 @@ class ConversationResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
+
+
+class AgentRunRequest(BaseModel):
+    question: str
+    conversation_id: Optional[str] = None
+
+
+class AgentRunResponse(BaseModel):
+    answer: str
+    intent: str
+    lineage: Optional[dict[str, Any]] = None
+    run_id: Optional[str] = None
+    cache_hit: bool = False
+    review: dict[str, Any]
+    trace: list[dict[str, Any]]
+    result: Optional[dict[str, Any]] = None

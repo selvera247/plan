@@ -23,10 +23,15 @@ class ApiAndCacheTests(unittest.TestCase):
         # Fresh cache/module state for isolated DB path
         import cache.result_cache as rc
         import db.connection as dbc
+        import infrastructure.cache.result_cache as irc
+        import infrastructure.persistence.connection as idbc
 
         rc._CACHE = None
+        irc._CACHE = None
         dbc.reset_sqlite_pool()
-        dbc.init_db()
+        idbc.reset_sqlite_pool()
+        idbc.init_db()
+
 
         from fastapi.testclient import TestClient
 
