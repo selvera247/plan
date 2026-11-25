@@ -1,1 +1,1 @@
-"""HTTP API for the governed finance assistant."""
+"""Compatibility shim — prefer ``interfaces.api``."""

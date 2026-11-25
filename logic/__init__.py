@@ -1,10 +1,13 @@
-"""Deterministic governed finance workflows."""
+"""Compatibility shim — prefer ``domain.workflows``."""
 
-from .common import Lineage, make_lineage
-from .reconcile import WORKFLOW_VERSION as RECONCILE_VERSION
-from .reconcile import reconcile_transactions
-from .variance import WORKFLOW_VERSION as VARIANCE_VERSION
-from .variance import analyze_variance
+from domain.workflows import (
+    RECONCILE_VERSION,
+    VARIANCE_VERSION,
+    Lineage,
+    analyze_variance,
+    make_lineage,
+    reconcile_transactions,
+)
 
 __all__ = [
     "Lineage",
