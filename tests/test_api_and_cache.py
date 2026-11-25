@@ -25,6 +25,7 @@ class ApiAndCacheTests(unittest.TestCase):
         import db.connection as dbc
 
         rc._CACHE = None
+        dbc.reset_sqlite_pool()
         dbc.init_db()
 
         from fastapi.testclient import TestClient
@@ -74,7 +75,7 @@ class ApiAndCacheTests(unittest.TestCase):
         self.assertEqual(resp.status_code, 200, resp.text)
         data = resp.json()
         self.assertEqual(data["result"]["flagged_count"], 6)
-        self.assertEqual(data["lineage"]["version"], "1.0.1")
+        self.assertEqual(data["lineage"]["version"], "1.0.2")
 
     def test_list_runs(self) -> None:
         resp = self.client.get("/v1/runs?limit=10")

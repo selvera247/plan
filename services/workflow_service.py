@@ -24,6 +24,19 @@ def _driver() -> str:
     return "postgres" if url.startswith(("postgres://", "postgresql://")) else "sqlite"
 
 
+def _audit_payload(result: dict[str, Any]) -> dict[str, Any]:
+    """Persist a compact audit record (counts/totals/lineage) — not full row arrays."""
+    return {
+        "matched_count": result.get("matched_count"),
+        "unmatched_left_count": result.get("unmatched_left_count"),
+        "unmatched_right_count": result.get("unmatched_right_count"),
+        "item_count": result.get("item_count"),
+        "flagged_count": result.get("flagged_count"),
+        "totals": result.get("totals"),
+        "lineage": result.get("lineage"),
+    }
+
+
 class WorkflowService:
     def __init__(self, cache: ResultCache | None = None) -> None:
         self.cache = cache or get_result_cache()
@@ -47,7 +60,7 @@ class WorkflowService:
                     version=version,
                     input_hash=key,
                     inputs=inputs,
-                    result=cached,
+                    result=_audit_payload(cached),
                     lineage=cached.get("lineage") or {},
                     cache_hit=True,
                     duration_ms=0.0,
@@ -73,7 +86,7 @@ class WorkflowService:
                 version=version,
                 input_hash=key,
                 inputs=inputs,
-                result=result,
+                result=_audit_payload(result),
                 lineage=lineage,
                 cache_hit=False,
                 duration_ms=duration_ms,
@@ -96,6 +109,7 @@ class WorkflowService:
         amount_tolerance: float = 0.01,
         left_label: str = "bank",
         right_label: str = "ledger",
+        include_details: bool = True,
         conversation_id: str | None = None,
     ) -> dict[str, Any]:
         left = resolve_data_path(left_source)
@@ -106,6 +120,7 @@ class WorkflowService:
             "amount_tolerance": amount_tolerance,
             "left_label": left_label,
             "right_label": right_label,
+            "include_details": include_details,
         }
         return self._run(
             workflow=RECON_NAME,
@@ -117,6 +132,7 @@ class WorkflowService:
                 amount_tolerance=amount_tolerance,
                 left_label=left_label,
                 right_label=right_label,
+                include_details=include_details,
             ),
             conversation_id=conversation_id,
         )
@@ -128,6 +144,7 @@ class WorkflowService:
         budget_source: str,
         threshold_pct: float = 5.0,
         threshold_abs: float | None = None,
+        include_details: bool = True,
         conversation_id: str | None = None,
     ) -> dict[str, Any]:
         actuals = resolve_data_path(actuals_source)
@@ -137,6 +154,7 @@ class WorkflowService:
             "budget_source": str(budget),
             "threshold_pct": threshold_pct,
             "threshold_abs": threshold_abs,
+            "include_details": include_details,
         }
         return self._run(
             workflow=VAR_NAME,
@@ -147,6 +165,7 @@ class WorkflowService:
                 budget,
                 threshold_pct=threshold_pct,
                 threshold_abs=threshold_abs,
+                include_details=include_details,
             ),
             conversation_id=conversation_id,
         )

@@ -115,8 +115,8 @@ class EdgeCaseTests(unittest.TestCase):
         self.assertEqual(recon["totals"]["total_variance"], 250.75)
         self.assertEqual(var["flagged_count"], 6)
         self.assertEqual(var["totals"]["absolute_variance"], 9550.0)
-        self.assertEqual(recon["lineage"]["version"], "1.0.1")
-        self.assertEqual(var["lineage"]["version"], "1.0.1")
+        self.assertEqual(recon["lineage"]["version"], "1.0.2")
+        self.assertEqual(var["lineage"]["version"], "1.0.2")
 
 
 if __name__ == "__main__":

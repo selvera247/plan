@@ -63,7 +63,7 @@ With auth enabled (`GOVERNED_API_KEY`), send `X-API-Key`.
 
 ## Workflows
 
-### 1. Reconciliation — `logic/reconcile.py` v1.0.1
+### 1. Reconciliation — `logic/reconcile.py` v1.0.2
 
 Matches two transaction sets on **amount + date + reference** (configurable amount tolerance). Returns matched/unmatched counts, items, total variance, and lineage.
 
@@ -78,7 +78,7 @@ result = reconcile_transactions(
 print(result["matched_count"], result["totals"]["total_variance"], result["lineage"])
 ```
 
-### 2. Variance analysis — `logic/variance.py` v1.0.1
+### 2. Variance analysis — `logic/variance.py` v1.0.2
 
 Compares actuals vs budget by account; flags items above a % (and optional absolute) threshold.
 
@@ -183,7 +183,16 @@ In production finance teams, **numbers must come from versioned, testable logic*
 3. Lineage travels with every answer.  
 4. Evals catch tool mis-routing and numeric drift.
 
-### Production hardening notes (v1.0.1)
+### Performance notes (v1.0.2)
+
+- Fast float money compares after quantized parse (no per-compare Decimal).
+- CSV columns resolved once per file; headers normalized once.
+- `include_details=false` on workflow APIs skips large row arrays.
+- Result cache uses `deepcopy` instead of JSON round-trips; hit-rate in `/ready`.
+- SQLite connections are thread-local + WAL; audit DB stores compact summaries.
+
+### Production hardening notes (v1.0.1+)
+
 
 - Optional tool numerics treat JSON `null` as the documented default (LLMs often send nulls).
 - Invalid tool-argument JSON is caught and returned as an error payload (no process crash).
