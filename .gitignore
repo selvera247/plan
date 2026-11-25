@@ -9,4 +9,6 @@ logs/
 .DS_Store
 data/governed_finance.db
 data/*.db
+data/*.db-shm
+data/*.db-wal
 

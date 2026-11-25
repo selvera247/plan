@@ -38,6 +38,17 @@ cp .env.example .env        # set OPENAI_API_KEY; optional GOVERNED_API_KEY / DA
 
 Requires `OPENAI_API_KEY` for chat. Workflow HTTP endpoints run without it. Optional: `OPENAI_MODEL` (default `gpt-4o-mini`), `GOVERNED_API_KEY`, `DATABASE_URL` (Postgres) or SQLite default.
 
+## Web console
+
+Accessible React UI (`web/`) for the agent pipeline and direct workflow runs:
+
+```bash
+cd web && npm install && npm run dev
+# http://127.0.0.1:5173  (proxies /v1 → :8000)
+```
+
+Component architecture, props design, and usage examples: [`web/README.md`](web/README.md).
+
 ## Production API
 
 ```bash
