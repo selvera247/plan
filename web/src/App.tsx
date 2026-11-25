@@ -10,20 +10,9 @@ export default function App() {
         Skip to content
       </a>
       <div className="gf-app">
-        <header style={{ marginBottom: "2rem" }}>
-          <div className="gf-row" style={{ justifyContent: "space-between" }}>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "0.75rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--gf-accent)",
-                fontWeight: 600,
-              }}
-            >
-              Governed Finance
-            </p>
+        <header className="gf-header">
+          <div className="gf-header__top">
+            <p className="gf-eyebrow">Governed Finance</p>
             <ApiStatus />
           </div>
           <h1 className="gf-brand">Ledger Night</h1>
@@ -52,14 +41,8 @@ export default function App() {
           />
         </main>
 
-        <footer
-          style={{
-            marginTop: "3rem",
-            color: "var(--gf-muted)",
-            fontSize: "0.8rem",
-          }}
-        >
-          <p style={{ margin: 0 }}>
+        <footer className="gf-footer">
+          <p>
             UI kit: accessible Button, fields, Alert, Skeleton, Tabs, Panel.
             Proxy → <code className="gf-mono">/v1</code> on :8000.
           </p>

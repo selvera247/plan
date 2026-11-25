@@ -14,13 +14,22 @@ import { AgentTrace } from "./AgentTrace";
 import { LineageMeta } from "./LineageMeta";
 
 const EXAMPLES = [
-  "Reconcile sample_bank against sample_ledger",
-  "Show budget variance for sample_actuals vs sample_budget",
-  "What workflows can you run?",
-];
+  {
+    short: "Reconcile samples",
+    question: "Reconcile sample_bank against sample_ledger",
+  },
+  {
+    short: "Budget variance",
+    question: "Show budget variance for sample_actuals vs sample_budget",
+  },
+  {
+    short: "What can you run?",
+    question: "What workflows can you run?",
+  },
+] as const;
 
 export function AskConsole() {
-  const [question, setQuestion] = useState(EXAMPLES[0]);
+  const [question, setQuestion] = useState<string>(EXAMPLES[0].question);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AgentRunResponse | null>(null);
@@ -86,21 +95,23 @@ export function AskConsole() {
           disabled={loading}
           rows={3}
         />
-        <div className="gf-row" role="group" aria-label="Example prompts">
+        <div className="gf-chips" role="group" aria-label="Example prompts">
           {EXAMPLES.map((ex) => (
             <Button
-              key={ex}
+              key={ex.question}
               type="button"
               variant="ghost"
               size="sm"
+              chip
               disabled={loading}
-              onClick={() => setQuestion(ex)}
+              title={ex.question}
+              onClick={() => setQuestion(ex.question)}
             >
-              {ex.length > 36 ? `${ex.slice(0, 34)}…` : ex}
+              {ex.short}
             </Button>
           ))}
         </div>
-        <div className="gf-row">
+        <div className="gf-row gf-row--actions">
           <Button type="submit" loading={loading} disabled={!question.trim()}>
             Run agents
           </Button>

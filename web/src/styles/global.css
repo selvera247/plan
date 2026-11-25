@@ -6,10 +6,16 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Avoid horizontal rubber-band from wide children */
+  overflow-x: clip;
+}
+
 html,
 body,
 #root {
   min-height: 100%;
+  min-width: 0;
 }
 
 body {
@@ -23,6 +29,10 @@ body {
   background-attachment: fixed;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* iOS / notched devices */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 a {
@@ -54,21 +64,56 @@ a {
   width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;
   padding: var(--gf-space-6) 0 var(--gf-space-7);
+  min-width: 0;
+}
+
+.gf-header {
+  margin-bottom: 2rem;
+}
+
+.gf-header__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.gf-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gf-accent);
+  font-weight: 600;
 }
 
 .gf-brand {
   font-family: var(--gf-font-brand);
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: clamp(1.75rem, 7vw, 2.75rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin: 0;
+  margin: 0.35rem 0 0;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .gf-lede {
   color: var(--gf-muted);
   max-width: 38rem;
   margin: var(--gf-space-3) 0 0;
+  font-size: clamp(0.9rem, 2.6vw, 1rem);
+}
+
+.gf-footer {
+  margin-top: 3rem;
+  color: var(--gf-muted);
+  font-size: 0.8rem;
+}
+
+.gf-footer p {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .gf-grid {
@@ -80,6 +125,32 @@ a {
   .gf-grid-2 {
     grid-template-columns: 1.2fr 0.8fr;
     align-items: start;
+  }
+}
+
+/* —— True phone / narrow viewport —— */
+@media (max-width: 640px) {
+  .gf-app {
+    width: 100%;
+    padding: 1rem 0.875rem 2rem;
+  }
+
+  .gf-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .gf-lede {
+    margin-top: 0.5rem;
+  }
+
+  .gf-footer {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .gf-app {
+    padding: 0.75rem 0.65rem 1.75rem;
   }
 }
 

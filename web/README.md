@@ -70,6 +70,10 @@ import { AgentTrace, LineageMeta } from "./components/finance";
 
 Keyboard: Tabs support Arrow / Home / End. Skip link jumps to `#main`. Focus moves to the live result region after an agent run.
 
+## Responsive / mobile
+
+Narrow viewports (≤640px) tighten padding, stretch tabs and primary actions, wrap prompt chips, stack agent-trace rows, and use a 2-column metric grid (1-column under 380px). Inputs use 16px type to avoid iOS focus zoom; safe-area insets apply on notched devices.
+
 ## Build
 
 ```bash
