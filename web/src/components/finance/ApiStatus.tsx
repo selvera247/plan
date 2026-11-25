@@ -11,14 +11,22 @@ export function ApiStatus() {
     let cancelled = false;
 
     async function ping() {
-      const res = await checkHealth(ac.signal);
-      if (cancelled) return;
-      setStatus(res.ok ? "ok" : "down");
-      setLabel(res.status);
+      try {
+        const res = await checkHealth(ac.signal);
+        if (cancelled) return;
+        setStatus(res.ok ? "ok" : "down");
+        setLabel(res.status);
+      } catch (err) {
+        if ((err as Error).name === "AbortError" || cancelled) return;
+        setStatus("down");
+        setLabel("unreachable");
+      }
     }
 
-    ping();
-    const id = window.setInterval(ping, 15000);
+    void ping();
+    const id = window.setInterval(() => {
+      void ping();
+    }, 15000);
     return () => {
       cancelled = true;
       ac.abort();

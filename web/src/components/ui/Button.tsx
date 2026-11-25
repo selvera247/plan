@@ -14,6 +14,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: ButtonSize;
   loading?: boolean;
   block?: boolean;
+  /** Soft wrap for prompt chips / long labels on narrow screens */
+  chip?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
 };
@@ -25,6 +27,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = "md",
       loading = false,
       block = false,
+      chip = false,
       leftIcon,
       rightIcon,
       disabled,
@@ -45,6 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           `gf-btn--${variant}`,
           size !== "md" && `gf-btn--${size}`,
           block && "gf-btn--block",
+          chip && "gf-btn--chip",
           className,
         )}
         disabled={isDisabled}

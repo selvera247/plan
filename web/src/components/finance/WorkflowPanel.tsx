@@ -197,9 +197,11 @@ export function WorkflowPanel() {
             disabled={loading}
           />
         )}
-        <Button type="submit" loading={loading} variant="secondary">
-          Run workflow
-        </Button>
+        <div className="gf-row gf-row--actions">
+          <Button type="submit" loading={loading} variant="secondary">
+            Run workflow
+          </Button>
+        </div>
       </form>
 
       {error ? (
