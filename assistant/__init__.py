@@ -1,5 +1,5 @@
-"""OpenAI-powered governed finance assistant."""
+"""Compatibility shim — prefer ``infrastructure.llm``."""
 
-from .agent import FinanceAssistant, SYSTEM_PROMPT
+from infrastructure.llm import SYSTEM_PROMPT, FinanceAssistant
 
 __all__ = ["FinanceAssistant", "SYSTEM_PROMPT"]

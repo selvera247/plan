@@ -2,31 +2,29 @@
 
 A **governed** finance assistant: an OpenAI model answers finance questions by calling **deterministic Python workflows**, never by inventing numbers. Every answer carries **lineage** (workflow name, version, inputs) and can be audited via durable workflow runs.
 
-Full scalable design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Design docs: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/CLEAN_ARCHITECTURE.md`](docs/CLEAN_ARCHITECTURE.md).
 
-## Architecture (minimal production)
+## Architecture (clean layers)
 
 ```
-Clients (HTTP / CLI / MCP)
+interfaces/ (api · cli · mcp)
         ↓
-FastAPI (api/app.py)  — X-API-Key, /health, /ready
+application/ (use cases + ports)
         ↓
-services/  WorkflowService · GovernedChatService
-        ↓
-cache/ (LRU TTL)  →  logic/* (deterministic)  →  db/ (SQLite or Postgres)
-        ↓
-workflow_runs + tool_calls + conversations (migrations/001_init.sql)
+domain/workflows/ (pure reconcile · variance)
+        ↑
+infrastructure/ (persistence · cache · llm · tools)
 ```
 
 | Layer | Role |
 |-------|------|
-| `api/` | Production HTTP API (workflows, chat, audit) |
-| `services/` | Orchestration: cache, persistence, chat tool routing |
-| `db/` + `migrations/` | Conversations, messages, workflow runs, tool calls |
-| `cache/` | Deterministic result memoization (LRU → Redis-ready) |
-| `logic/` | Pure workflows + shared helpers |
-| `tools/` / `assistant/` | Tool registry, MCP, CLI agent |
-| `evals/` / `tests/` | Golden evals + regression / API smoke tests |
+| `domain/` | Pure governed workflows (no frameworks) |
+| `application/` | Use cases: WorkflowService, GovernedChatService, ports |
+| `infrastructure/` | DB, cache, OpenAI, tool registry, paths |
+| `interfaces/` | FastAPI, CLI, MCP adapters |
+| `migrations/` · `data/` · `evals/` · `tests/` | Schema, samples, golden evals, regression |
+
+Legacy import paths (`logic/`, `api/`, `services/`, …) remain as **compatibility shims**.
 
 ## Setup
 
@@ -43,7 +41,8 @@ Requires `OPENAI_API_KEY` for chat. Workflow HTTP endpoints run without it. Opti
 ## Production API
 
 ```bash
-uvicorn api.app:app --reload --port 8000
+uvicorn interfaces.api.app:app --reload --port 8000
+# or: uvicorn api.app:app
 # Docs: http://127.0.0.1:8000/docs
 ```
 
@@ -115,7 +114,8 @@ python3 -m tools.mcp_server
 ## Run the assistant
 
 ```bash
-python3 -m assistant.agent
+python3 -m interfaces.cli.assistant_cli
+# or: python3 -m assistant.agent
 ```
 
 Example prompts:
@@ -153,18 +153,17 @@ Results are written to `logs/eval_results.json`.
 
 ```
 /
+├── domain/workflows/          # pure business logic
+├── application/               # use cases + ports
+├── infrastructure/            # DB, cache, LLM, tools, config
+├── interfaces/                # api, cli, mcp
+├── migrations/ · data/
+├── evals/ · tests/
 ├── docs/ARCHITECTURE.md
-├── api/                 # FastAPI app + schemas
-├── services/            # WorkflowService, GovernedChatService
-├── db/ + migrations/    # SQLite/Postgres persistence
-├── cache/               # LRU result cache (Redis-ready keys)
-├── logic/               # deterministic workflows
-├── tools/ + assistant/
-├── evals/ + tests/
-├── data/                # sample CSVs (+ local SQLite db at runtime)
+├── docs/CLEAN_ARCHITECTURE.md
+├── logic/ · api/ · …          # compatibility shims
 ├── README.md
-├── requirements.txt
-└── .env.example
+└── requirements.txt
 ```
 
 ## Tests

@@ -1,5 +1,5 @@
-"""Application services."""
+"""Compatibility shim — prefer ``application``."""
 
-from .workflow_service import WorkflowService
+from application.workflow_service import WorkflowService
 
 __all__ = ["WorkflowService"]
